@@ -56,6 +56,12 @@ To export from the Godot editor instead:
    (adds the passthrough splash screen).
 4. Export with the "Pico 4 (RELEASE)" or "Oculus Quest (RELEASE)" preset.
 
+`tools/sync_songs.sh [DIR]` copies Beat Saber custom songs (default: the `CustomLevels` folder of a Steam
+Beat Saber install) to the connected headset, skipping songs that are already there.
+
+The Pico build uses the Compatibility (OpenGL ES) renderer: with Vulkan the Pico OpenXR runtime crashes
+during startup.
+
 Custom songs can also be copied to `/sdcard/Android/data/org.godotengine.open_saber_plus/files/Songs/`
 on the headset, or uploaded through the built-in web uploader shown in the menu.
 
