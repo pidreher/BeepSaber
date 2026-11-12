@@ -284,11 +284,12 @@ func _select_song(id: int) -> void:
 	($SongInfo_Label as Label).text = """Song Author: %s
 	Song Title: %s
 	Beatmap Author: %s
-	Play Count: %d""" % [
+	Play Count: %d%s""" % [
 		map.song_author_name,
 		map.song_name,
 		map.level_author_name,
-		PlayCount.get_total_play_count(map)
+		PlayCount.get_total_play_count(map),
+		_describe_map_mods(map)
 	]
 	
 	_set_favorite_icon(PlayCount.is_favorite(map))
@@ -307,6 +308,23 @@ func _select_song(id: int) -> void:
 	
 	var d := PlayCount.get_last_difficulty(map)
 	_select_difficulty(0 if d < 0 else (d & Constants.DIFFICULTY_MASK))
+
+const SUPPORTED_MAP_MODS := ["Chroma", "Mapping Extensions"]
+
+# lists the mods (SongCore requirements/suggestions) used by any difficulty of the map
+func _describe_map_mods(map: MapInfo) -> String:
+	var mods: Array[String] = []
+	for diff in map.difficulty_beatmaps:
+		for key in ["_requirements", "_suggestions", "requirements", "suggestions"]:
+			for mod: Variant in Utils.get_array(diff.custom_data, key, []):
+				if mod is String and not mods.has(mod):
+					mods.append(mod)
+	if mods.is_empty():
+		return ""
+	var described: Array[String] = []
+	for mod in mods:
+		described.append(mod if mod in SUPPORTED_MAP_MODS else mod + " (unsupported)")
+	return "\n\tMods: " + ", ".join(described)
 
 func _on_stop_prev_timeout() -> void:
 	var song_prev_Tween := song_preview.create_tween().set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)

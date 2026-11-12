@@ -123,30 +123,64 @@ static func custom_thread_call(thread : Thread, function : Callable, params := [
 		thread_finished.append(thread)
 		return thread.start(function.bindv(params))
 
-static func precise_measurement(x : int) -> float:
-	if x < 1000:
-		return x
-	else:
-		return (x-1000.)/1000.
+# Mapping Extensions precise placement: values >= 1000 or <= -1000 are in
+# 1/1000 lane units, offset so that +-1000 both mean lane/layer 0.
+# Values in between are plain (possibly extended) lane indices.
+static func precise_measurement(x: float) -> float:
+	if x >= 1000:
+		return (x - 1000.) / 1000.
+	elif x <= -1000:
+		return (x + 1000.) / 1000.
+	return x
+
+# Mapping Extensions precise wall height (see ObstacleController.Init patch of the mod)
+static func precise_wall_height(h: float) -> float:
+	if h >= 1000:
+		return (h - 1000.) / 1000.
+	elif h <= -1000:
+		return (h + 2000.) / 1000.
+	return h
+
+# Chroma: colors are [r, g, b(, a)] arrays in "_customData._color" (v2) or
+# "customData.color" (v3/v4). Returns NO_COLOR (alpha 0) if absent.
+const NO_COLOR := Color(0, 0, 0, 0)
+static func get_custom_color(dict: Dictionary, v2: bool) -> Color:
+	if Settings.disable_map_color:
+		return NO_COLOR
+	var custom := get_dict(dict, "_customData" if v2 else "customData", {})
+	if custom.is_empty():
+		return NO_COLOR
+	var c: Variant = custom.get("_color" if v2 else "color")
+	if not c is Array or (c as Array).size() < 3:
+		return NO_COLOR
+	var a := c as Array
+	return Color(float(a[0]), float(a[1]), float(a[2]), 1.)
 
 static func precise_angle_rad(direction: float, offset: float) -> float:
 	var angle : float
-	if direction < 1000:
-		angle = Constants.CUBE_ROTATIONS[direction]
+	var any_direction := false
+	if direction >= 2000 and direction <= 2360:
+		# Mapping Extensions: rotated any-direction (dot) note
+		angle = deg_to_rad(2000. - direction)
+		any_direction = true
+	elif direction >= 1000 and direction <= 1360:
+		# Mapping Extensions: 0-360 degrees clockwise, 0 = down
+		angle = deg_to_rad(1000. - direction)
+	elif direction >= 0 and direction <= 8:
+		angle = Constants.CUBE_ROTATIONS[int(direction)]
+		any_direction = int(direction) == 8
 	else:
-		angle = direction - 1000
+		# unknown value: treat as any-direction note instead of crashing
+		angle = 0.
+		any_direction = true
 	angle += offset * (PI/180.)
-	if angle < 0:
-		angle += TAU
-	elif angle >= TAU:
-		angle -= TAU
+	angle = fposmod(angle, TAU)
 	if Settings.flip & Constants.FLIP_VERTICAL:
 		angle = PI - angle
 	if Settings.flip & Constants.FLIP_HORIZONTAL:
 		angle = -angle
-		if angle < 0:
-			angle += TAU
-	if direction == 8:
+	angle = fposmod(angle, TAU)
+	if any_direction:
 		angle += Constants.DIRECTION8_OFFSET
 	return angle
 
@@ -182,13 +216,13 @@ static func update_bus_speed(bus_name: String) -> void:
 	effect.pitch_scale = 1./speed
 	AudioServer.add_bus_effect(bus, effect)
 
-static func adjust_vertical(y: int) -> int:
+static func adjust_vertical(y: float) -> float:
 	if Settings.flip & Constants.FLIP_VERTICAL:
 		return 2-y
 	else:
 		return y
 
-static func adjust_horizontal(x: int) -> int:
+static func adjust_horizontal(x: float) -> float:
 	if Settings.flip & Constants.FLIP_HORIZONTAL:
 		return 3-x
 	else:

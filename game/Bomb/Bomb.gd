@@ -15,6 +15,18 @@ func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: Be
 func on_miss() -> void:
 	queue_free()
 
+static var _chroma_materials := {}
+
+static func _chroma_material(color: Color) -> StandardMaterial3D:
+	if not _chroma_materials.has(color):
+		var m := StandardMaterial3D.new()
+		m.albedo_color = color
+		m.emission_enabled = true
+		m.emission = color
+		m.emission_energy_multiplier = 0.5
+		_chroma_materials[color] = m
+	return _chroma_materials[color]
+
 func spawn(info: BombInfo, current_beat: float) -> void:
 	speed = Constants.BEAT_DISTANCE * Map.current_info.beats_per_minute / 60.0
 	beat = info.beat
@@ -26,6 +38,9 @@ func spawn(info: BombInfo, current_beat: float) -> void:
 	transform.origin.z = -distance * Constants.BEAT_DISTANCE
 	
 	add_lane_rotation(info.rotation)
+	
+	if info.custom_color.a > 0: # Chroma
+		($BombAnimation/Mesh/Icosphere as MeshInstance3D).material_override = _chroma_material(info.custom_color)
 	
 	var anim := $AnimationPlayer as AnimationPlayer
 	var anim_speed := Map.current_difficulty.note_jump_movement_speed / 9.0

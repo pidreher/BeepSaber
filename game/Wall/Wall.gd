@@ -44,6 +44,12 @@ func spawn(wall_info: ObstacleInfo, current_beat: float) -> void:
 	shape.size.z = z_size
 	despawn_z = Constants.MISS_Z + depth
 	(mesh.material_override as ShaderMaterial).set_shader_parameter(&"size", Vector3(x_size, y_size, z_size))
+	if wall_info.custom_color.a > 0: # Chroma
+		# the default wall albedo is an over-saturated red (1.8, -0.2, -0.2); map
+		# the custom color into the same range so it looks equally bright
+		var c := wall_info.custom_color
+		(mesh.material_override as ShaderMaterial).set_shader_parameter(&"albedo_color",
+			Color(c.r * 2. - .2, c.g * 2. - .2, c.b * 2. - .2, 0.))
 	
 	var x := (0.5 * wall_info.width + wall_info.line_index - 2) * Settings.LANE_DISTANCE_X
 	var y := (0.5 * wall_info.height + wall_info.line_layer) * Constants.LANE_DISTANCE_Y

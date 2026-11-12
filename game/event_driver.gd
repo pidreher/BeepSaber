@@ -174,33 +174,37 @@ func set_all_on(left: Color, right: Color) -> void:
 func process_event(data: EventInfo) -> void:
 	if disabled: return
 	if data.type in range(0,5):
+		# Chroma: a per-event color replaces the left/right/white color of this event only
+		var ev_right := data.custom_color if data.custom_color.a > 0 else right_color
+		var ev_left := data.custom_color if data.custom_color.a > 0 else left_color
+		var ev_white := data.custom_color if data.custom_color.a > 0 else Color.WHITE
 		match data.value:
 			EventInfo.VALUE_LIGHTS_OFF:
 				turn_light_off(data.type)
 			EventInfo.VALUE_LIGHTS_RIGHT_ON:
-				turn_light_on(data.type, right_color)
+				turn_light_on(data.type, ev_right)
 			EventInfo.VALUE_LIGHTS_RIGHT_FLASH:
-				flash_light_on(data.type, right_color)
+				flash_light_on(data.type, ev_right)
 			EventInfo.VALUE_LIGHTS_RIGHT_FADE:
-				flash_light_then_fade_off(data.type, right_color)
+				flash_light_then_fade_off(data.type, ev_right)
 			EventInfo.VALUE_LIGHTS_FADE_TO_RIGHT:
-				fade_light_from_current(data.type, right_color)
+				fade_light_from_current(data.type, ev_right)
 			EventInfo.VALUE_LIGHTS_LEFT_ON:
-				turn_light_on(data.type, left_color)
+				turn_light_on(data.type, ev_left)
 			EventInfo.VALUE_LIGHTS_LEFT_FLASH:
-				flash_light_on(data.type, left_color)
+				flash_light_on(data.type, ev_left)
 			EventInfo.VALUE_LIGHTS_LEFT_FADE:
-				flash_light_then_fade_off(data.type, left_color)
+				flash_light_then_fade_off(data.type, ev_left)
 			EventInfo.VALUE_LIGHTS_FADE_TO_LEFT:
-				fade_light_from_current(data.type, left_color)
+				fade_light_from_current(data.type, ev_left)
 			EventInfo.VALUE_LIGHTS_WHITE_ON:
-				turn_light_on(data.type, Color.WHITE)
+				turn_light_on(data.type, ev_white)
 			EventInfo.VALUE_LIGHTS_WHITE_FLASH:
-				flash_light_on(data.type, Color.WHITE)
+				flash_light_on(data.type, ev_white)
 			EventInfo.VALUE_LIGHTS_WHITE_FADE:
-				flash_light_then_fade_off(data.type, Color.WHITE)
+				flash_light_then_fade_off(data.type, ev_white)
 			EventInfo.VALUE_LIGHTS_FADE_TO_WHITE:
-				fade_light_from_current(data.type, Color.WHITE)
+				fade_light_from_current(data.type, ev_white)
 	else:
 		match data.type:
 			8:

@@ -5,6 +5,7 @@ var beat: float
 var line_index: float
 var line_layer: float
 var rotation: float
+var custom_color := Utils.NO_COLOR # Chroma, alpha 0 = none
 
 @warning_ignore("shadowed_variable")
 func _init(beat: float, line_index: float, line_layer: float, rotation_degrees: float) -> void:
@@ -14,20 +15,23 @@ func _init(beat: float, line_index: float, line_layer: float, rotation_degrees: 
 	self.rotation = Utils.adjust_lane_rotation(rotation_degrees * (PI/180.))
 	if abs(Settings.gradual_rotation) > 1e-5:
 		self.rotation += Settings.gradual_rotation * beat
-		self.rotation += Settings.gradual_rotation * beat
 
 static func new_v2(bomb_dict: Dictionary) -> BombInfo:
-	return BombInfo.new(
+	var info := BombInfo.new(
 		Utils.get_float(bomb_dict, "_time", 0.0),
 		Utils.precise_measurement(Utils.get_float(bomb_dict, "_lineIndex", 0)),
 		Utils.precise_measurement(Utils.get_float(bomb_dict, "_lineLayer", 0)),
 		Utils.get_float(bomb_dict, "r", 0)
 	)
+	info.custom_color = Utils.get_custom_color(bomb_dict, true)
+	return info
 
 static func new_v3(bomb_dict: Dictionary) -> BombInfo:
-	return BombInfo.new(
+	var info := BombInfo.new(
 		Utils.get_float(bomb_dict, "b", 0.0),
 		Utils.precise_measurement(Utils.get_float(bomb_dict, "x", 0)),
 		Utils.precise_measurement(Utils.get_float(bomb_dict, "y", 0)),
 		Utils.get_float(bomb_dict, "r", 0)
 	)
+	info.custom_color = Utils.get_custom_color(bomb_dict, false)
+	return info
