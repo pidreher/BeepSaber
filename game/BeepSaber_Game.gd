@@ -195,14 +195,14 @@ func show_MapSourceDialogs(showing: bool = true) -> void:
 
 # call this method to submit a new highscore to the database
 func _submit_highscore(player_name: String) -> void:
-	if gamestate == gamestate_newhighscore:
-		Highscores.add_highscore(
-			Map.current_info,
-			Map.current_difficulty.difficulty_rank,
-			player_name,
-			Scoreboard.points)
-			
-		_transition_game_state(gamestate_mapcomplete)
+	player_name = player_name.strip_edges()
+	if gamestate != gamestate_newhighscore or player_name.is_empty():
+		return
+	Highscores.rename_record(Map.current_info, Map.current_difficulty.difficulty_rank, _new_record_epoch, player_name)
+	highscore_panel.load_highscores(Map.current_info, Map.current_difficulty.difficulty_rank)
+	endscore.show_saved_name(player_name)
+	name_selector_canvas._hide()
+	highscore_keyboard._hide()
 
 # Sabers are Area3Ds without a collision layer, so the physics engine never
 # reports them touching each other; check the distance between the blades.
@@ -300,6 +300,10 @@ func _ready() -> void:
 		xr_origin.add_child(preload("res://OQ_Toolkit/OQ_ARVROrigin/Feature_VRSimulator.tscn").instantiate())
 	
 	UI_AudioEngine.attach_children(highscore_keyboard)
+	highscore_keyboard.text_input_cancel.connect(func() -> void:
+		name_selector_canvas._hide()
+		highscore_keyboard._hide())
+	endscore.change_name.connect(_change_highscore_name)
 	UI_AudioEngine.attach_children(online_search_keyboard)
 	
 	_transition_game_state(gamestate_mapselection)
@@ -464,10 +468,29 @@ func _on_song_ended() -> void:
 		new_record
 	)
 	
-	if Highscores.is_new_highscore(Map.current_info,Map.current_difficulty.difficulty_rank,Scoreboard.points):
+	# a new highscore is saved right away under the most recent player name;
+	# the score screen offers to change the name (failed runs are not saved)
+	var rank := Map.current_difficulty.difficulty_rank
+	if current_percent >= 0 and Highscores.is_new_highscore(Map.current_info, rank, Scoreboard.points):
+		var player_name := Highscores.get_last_player_name()
+		if player_name.is_empty():
+			player_name = "Player"
+		var record := Highscores.add_highscore(Map.current_info, rank, player_name, Scoreboard.points)
+		_new_record_epoch = float(record.epoch_time)
+		endscore.show_saved_name(player_name)
 		_transition_game_state(gamestate_newhighscore)
 	else:
+		endscore.show_saved_name("")
 		_transition_game_state(gamestate_mapcomplete)
+
+var _new_record_epoch := 0.0
+
+# "Change name" on the score screen: show the recent names and the keyboard
+func _change_highscore_name() -> void:
+	if gamestate != gamestate_newhighscore:
+		return
+	name_selector_canvas._show()
+	highscore_keyboard._show()
 
 func _restart_button() -> void:
 	start_map(Map.current_info, Map.current_difficulty)

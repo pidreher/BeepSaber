@@ -1,91 +1,104 @@
 extends Node3D
 class_name EndScore
+# Score screen shown after a song: song info, grade, accuracy, score and record,
+# badges, the name the highscore was saved under (with "Change name") and the
+# Repeat / Main Menu buttons. Rendered on an OQ_UI2DCanvas.
 
 signal mainmenu
 signal repeat
+signal change_name
 
-var animated_percent: float = 0.0
-@onready var raycast_area := $RaycastArea as Area3D
-@onready var collision := $RaycastArea/CollisionShape3D as CollisionShape3D
+const GRADE_COLORS := {
+	"S": Color("ffd84d"), "A": Color("4dff9a"), "B": Color("4dc3ff"), "C": Color("b48cff"),
+	"D": Color("ffa04d"), "E": Color("ff7a4d"), "F": Color("ff4d5e"),
+}
+
+@onready var canvas := $Canvas as OQ_UI2DCanvas
+@onready var _title := _n("Title") as Label
+@onready var _subtitle := _n("Subtitle") as Label
+@onready var _grade := _n("Grade") as Label
+@onready var _grade_caption := _n("GradeCaption") as Label
+@onready var _ring := _n("AccuracyRing") as AccuracyRing
+@onready var _score := _n("Score") as Label
+@onready var _record := _n("Record") as Label
+@onready var _full_combo := _n("FullComboBadge") as Control
+@onready var _new_record := _n("NewRecordBadge") as Control
+@onready var _name_row := _n("NameRow") as Control
+@onready var _saved_as := _n("SavedAs") as Label
+@onready var _repeat := _n("Repeat") as Button
+@onready var _main_menu := _n("MainMenu") as Button
+var _tween: Tween
+
+# OQ_UI2DCanvas moves the panel into its SubViewport, which breaks %unique
+# name lookups, so find the nodes by name below the canvas instead
+func _n(node_name: String) -> Node:
+	return ($Canvas as Node).find_child(node_name, true, false)
 
 func _ready() -> void:
+	_repeat.pressed.connect(func() -> void: repeat.emit())
+	_main_menu.pressed.connect(func() -> void:
+		set_buttons_disabled(true)
+		mainmenu.emit())
+	(_n("ChangeName") as Button).pressed.connect(func() -> void: change_name.emit())
 	set_buttons_disabled(true)
 
 func _show() -> void:
-	raycast_area.collision_layer = CollisionLayerConstants.Ui_mask
-	collision.disabled = false
-	($Repeat as UIRaycastButton).collision_layer = CollisionLayerConstants.Ui_mask
-	($MainMenu as UIRaycastButton).collision_layer = CollisionLayerConstants.Ui_mask
 	show()
+	canvas._show()
 
 func _hide() -> void:
-	raycast_area.collision_layer = 0
-	collision.disabled = true
-	($Repeat as UIRaycastButton).collision_layer = 0
-	($MainMenu as UIRaycastButton).collision_layer = 0
+	canvas._hide()
 	hide()
 
-func show_score(score: int, record: int, percent: float, song_string: String, is_full_combo: bool, is_new_record: bool) -> void:
-	var details_mesh := ($Details as MeshInstance3D).mesh as TextMesh
-	var details_material := ($Details as MeshInstance3D).material_override as StandardMaterial3D
-	var percent_indicator := $PercentIndicator as PercentIndicator
-	var grade_label := $GradeViewport/GradeLabel as RichTextLabel
-	var fc_label := $FCViewport/FCLabel as RichTextLabel
-	var nr_label := $NRViewport/NRLabel as RichTextLabel
-	var name_label := ($NameLabel as MeshInstance3D).mesh as TextMesh
-	
-	details_material.albedo_color = Color.TRANSPARENT
-	grade_label.modulate = Color.TRANSPARENT
-	fc_label.modulate = Color.TRANSPARENT
-	nr_label.modulate = Color.TRANSPARENT
-	percent_indicator.endscore()
-	fc_label.visible = is_full_combo
-	nr_label.visible = is_new_record
-	name_label.text = song_string
-	details_mesh.text = "Your Score:\n%d\n\nRecord:\n%d" % [score,record]
-	
-	if percent >= 0.98:
-		grade_label.text = "[center][rainbow freq=0.5 sat=0.7 val=2]A+"
-	elif percent >= 0.90:
-		grade_label.text = "[center]A"
-	elif percent >= 0.80:
-		grade_label.text = "[center]B"
-	elif percent >= 0.70:
-		grade_label.text = "[center]C"
-	elif percent >= 0.60:
-		grade_label.text = "[center]D"
-	elif percent >= 0.50:
-		grade_label.text = "[center]E"
-	elif percent >= 0.00:
-		grade_label.text = "[center]F"
-	else:
-		grade_label.text = "[center]F-"
-	
-	var tw := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	if percent >= 0:
-		tw.tween_property(self,^"animated_percent",percent,3.0).from(0.0)
-		tw.play()
-		while tw.is_running():
-			percent_indicator.update_percent(animated_percent)
-			await get_tree().process_frame
-		#_on_Tween_tween_completed()
-		
-		percent_indicator.update_percent(animated_percent)
-
-	tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT).set_parallel()
-	tw.tween_property(details_material,^"albedo_color",Color.WHITE,2).from(Color.TRANSPARENT)
-	tw.tween_property(grade_label,^"modulate",Color.WHITE,2).from(Color.TRANSPARENT)
-	tw.tween_property(fc_label,^"modulate",Color.WHITE,2).from(Color.TRANSPARENT)
-	tw.tween_property(nr_label,^"modulate",Color.WHITE,2).from(Color.TRANSPARENT)
-	tw.play()
-
 func set_buttons_disabled(disabled: bool) -> void:
-	($Repeat/Collision as CollisionShape3D).disabled = disabled
-	($MainMenu/Collision as CollisionShape3D).disabled = disabled
+	_repeat.disabled = disabled
+	_main_menu.disabled = disabled
 
-func _on_Repeat_button_up() -> void:
-	repeat.emit()
+# player_name: the name the new highscore was saved under, "" if none was saved
+func show_saved_name(player_name: String) -> void:
+	_name_row.visible = not player_name.is_empty()
+	_saved_as.text = "Saved as %s" % player_name
 
-func _on_MainMenu_button_up() -> void:
-	set_buttons_disabled(true)
-	mainmenu.emit()
+func show_score(score: int, record: int, percent: float, _song_string: String, is_full_combo: bool, is_new_record: bool) -> void:
+	var info := Map.current_info
+	var diff := Map.current_difficulty
+	_title.text = info.song_name if info.song_sub_name.is_empty() else "%s %s" % [info.song_name, info.song_sub_name]
+	_subtitle.text = "%s  ·  %s  ·  mapped by %s" % [info.song_author_name, diff.get_display_name(), info.level_author_name]
+
+	var failed := percent < 0
+	var grade := "F" if failed else _grade_for(percent)
+	_grade.text = grade
+	_grade.add_theme_color_override(&"font_color", GRADE_COLORS[grade.left(1)])
+	_grade_caption.text = "FAILED" if failed else ("PERFECT" if percent >= 0.999 else "")
+	_ring.ring_color = GRADE_COLORS[grade.left(1)]
+	_ring.text_override = "–" if failed else ""
+	_score.text = _format_int(score)
+	_record.text = "Best  %s" % _format_int(maxi(record, score))
+	_full_combo.visible = is_full_combo and not failed
+	_new_record.visible = is_new_record
+
+	# count the accuracy up and fade the details in
+	_ring.value = 0.0
+	_grade.modulate.a = 0.0
+	if _tween:
+		_tween.kill()
+	_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_tween.tween_property(_ring, ^"value", maxf(percent, 0.0), 1.6)
+	_tween.tween_property(_grade, ^"modulate:a", 1.0, 0.5)
+
+static func _grade_for(percent: float) -> String:
+	if percent >= 0.98: return "S"
+	if percent >= 0.90: return "A"
+	if percent >= 0.80: return "B"
+	if percent >= 0.70: return "C"
+	if percent >= 0.60: return "D"
+	if percent >= 0.50: return "E"
+	return "F"
+
+static func _format_int(value: int) -> String:
+	var s := str(absi(value))
+	var out := ""
+	while s.length() > 3:
+		out = "," + s.right(3) + out
+		s = s.left(s.length() - 3)
+	return ("-" if value < 0 else "") + s + out

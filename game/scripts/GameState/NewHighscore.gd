@@ -6,7 +6,8 @@ func _ready(game: BeepSaber_Game) -> void:
 	game.highscore_panel.load_highscores(
 		Map.current_info,Map.current_difficulty.difficulty_rank)
 	
-	game.endscore.set_buttons_disabled(true)
+	# the score is already saved; renaming it is optional
+	game.endscore.set_buttons_disabled(false)
 	
 	# fill name selector with most recent player names
 	game._name_selector().clear_names()
@@ -24,7 +25,7 @@ func _ready(game: BeepSaber_Game) -> void:
 	game.endscore._show()
 	game.pause_menu._hide()
 	game.highscore_canvas._show()
-	game.name_selector_canvas._show()
+	game.name_selector_canvas._hide()
 	game.left_saber._hide()
 	game.right_saber._hide()
 	game.multiplier_label.visible = false
@@ -33,7 +34,7 @@ func _ready(game: BeepSaber_Game) -> void:
 	game.track.visible = false
 	game.left_ui_raycast.visible = true
 	game.right_ui_raycast.visible = true
-	game.highscore_keyboard._show()
+	game.highscore_keyboard._hide()
 	game.online_search_keyboard._hide()
 	game.left_saber.set_swingcast_enabled(false)
 	game.right_saber.set_swingcast_enabled(false)

@@ -228,7 +228,6 @@ mesh = SubResource("QuadMesh_02xdc")
 
 [node name="EndScore" parent="." unique_id=675269165 instance=ExtResource("20_fgfws")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.60386, -0.777581)
-layers = 3
 
 [node name="PauseMenu_canvas" parent="." unique_id=733509686 instance=ExtResource("3")]
 transform = Transform3D(1.86849, 0, 0, 0, 1.86849, 0, 0, 0, 1.86849, 0, 1.43532, -0.756856)

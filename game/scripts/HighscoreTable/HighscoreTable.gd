@@ -96,8 +96,8 @@ static func get_speed_from_rank(diff_rank: int) -> int:
 # player_name : string name for the player
 # score : integer score to store
 #
-# return : None
-func add_highscore(map_info: MapInfo, diff_rank: int, player_name: String, score: int) -> void:
+# return : the stored record (use its "epoch_time" with rename_record())
+func add_highscore(map_info: MapInfo, diff_rank: int, player_name: String, score: int) -> Dictionary:
 	# get existing records for song + difficulty
 	var hs_key := map_info.get_key()
 	diff_rank = get_rank_key(diff_rank)
@@ -118,6 +118,29 @@ func add_highscore(map_info: MapInfo, diff_rank: int, player_name: String, score
 	_hs_table[hs_key][str(diff_rank)] = records
 	
 	save_hs_table()
+	return record
+
+# changes the player name of a stored record (identified by its epoch_time)
+func rename_record(map_info: MapInfo, diff_rank: int, epoch_time: float, player_name: String) -> void:
+	for record: Dictionary in _get_records(map_info.get_key(), get_rank_key(diff_rank)):
+		if is_equal_approx(float(record.epoch_time), epoch_time):
+			record.player_name = player_name
+			save_hs_table()
+			return
+
+# return : the name used for the most recent highscore, or "" if there is none
+func get_last_player_name() -> String:
+	var latest := -1.0
+	var latest_name := ""
+	for song_records: Variant in _hs_table.values():
+		if not song_records is Dictionary: continue
+		for diff_records: Variant in (song_records as Dictionary).values():
+			if not diff_records is Array: continue
+			for record: Variant in diff_records:
+				if record is Dictionary and float(record.get("epoch_time", 0)) > latest:
+					latest = float(record.epoch_time)
+					latest_name = str(record.get("player_name", ""))
+	return latest_name
 
 # return : the list of records for the given map + difficulty
 func get_records(map_info: MapInfo, diff_rank: int) -> Array:
