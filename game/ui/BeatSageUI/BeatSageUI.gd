@@ -1,8 +1,7 @@
 extends Panel
 class_name BeatSagePanel
 
-@export_node_path var youtube_ui_path: NodePath
-var youtube_ui: YoutubeUI
+@export var youtube_ui: YoutubeUI
 
 @onready var beatsage_request_ := $BeatSageRequest as BeatSageRequest
 @onready var song_url := $SongURL as LineEdit
@@ -44,7 +43,6 @@ func _ready() -> void:
 	beatsage_request_.download_dir = BS_TEMP_DIR
 	
 	# setup youtube search UI and connect signal handlers
-	youtube_ui = get_node(youtube_ui_path)
 	if is_instance_valid(youtube_ui):
 		youtube_ui.song_selected.connect(_on_youtube_song_selected)
 	
@@ -80,33 +78,33 @@ func _show():
 
 func _on_SubmitButton_pressed() -> void:
 	var difficulties := ""
-	if difficulty_normal.pressed:
+	if difficulty_normal.button_pressed:
 		difficulties += ",Normal"
-	if difficulty_hard.pressed:
+	if difficulty_hard.button_pressed:
 		difficulties += ",Hard"
-	if difficulty_expert.pressed:
+	if difficulty_expert.button_pressed:
 		difficulties += ",Expert"
-	if difficulty_expert_plus.pressed:
+	if difficulty_expert_plus.button_pressed:
 		difficulties += ",ExpertPlus"
 	if difficulties.length() > 0:
 		difficulties = difficulties.substr(1)
 		
 	var modes := ""
-	if mode_standard.pressed:
+	if mode_standard.button_pressed:
 		modes += ",Standard"
-	if mode_no_arrows.pressed:
+	if mode_no_arrows.button_pressed:
 		modes += ",NoArrows"
-	if mode_one_saber.pressed:
+	if mode_one_saber.button_pressed:
 		modes += ",OneSaber"
 	if modes.length() > 0:
 		modes = modes.substr(1)
 	
 	var events := ""
-	if events_bombs.pressed:
+	if events_bombs.button_pressed:
 		events += ",Bombs"
-	if events_dot_block.pressed:
+	if events_dot_block.button_pressed:
 		events += ",DotBlocks"
-	if events_obstacles.pressed:
+	if events_obstacles.button_pressed:
 		events += ",Obstacles"
 	if events.length() > 0:
 		events = events.substr(1)
@@ -193,7 +191,7 @@ func _on_BeatSageRequest_youtube_metadata_request_failed() -> void:
 
 func _on_YoutubeButton_pressed() -> void:
 	if is_instance_valid(youtube_ui):
-		youtube_ui.show()
+		youtube_ui._show()
 
 # emitted by the YouTube search dialog when the player selects a video
 func _on_youtube_song_selected(video_metadata) -> void:

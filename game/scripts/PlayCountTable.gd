@@ -74,9 +74,10 @@ func get_last_difficulty(map_info: MapInfo) -> int:
 	var key_dict := Utils.get_dict(_pc_table, song_key, {})
 	if not _pc_table.has(song_key):
 		return -1
-	if not key_dict.has(FAVORITE):
+	if not key_dict.has(LAST_DIFFICULTY):
 		return -1
-	return key_dict[FAVORITE]
+	var rank: Variant = key_dict[LAST_DIFFICULTY]
+	return int(rank) if rank is int or rank is float else -1
 
 # return : the map's play count for the given difficulty
 func get_play_count(map_info: MapInfo, diff_rank: int) -> int:

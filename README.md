@@ -25,6 +25,12 @@ There is one demo song included that is part of the deployed package.
 
 You can play custom songs by downloading them in the in-game menu.
 
+The Library on your left has **My Songs** and **BeatSaver** tabs with the same song
+details and audio preview controls. Browse freely, then press **Load** (or select a
+local song twice) to put it in the center **Now Playing** panel. Choose its
+characteristic, difficulty and modifiers there, then press **Play**. BeatSaver's
+**Download** button becomes **Load** when the download finishes.
+
 ## Map mods
 * **Chroma**: per-note, bomb, wall and lighting event colors (`_color` / `color` custom data).
   Per-light-ID effects (`_lightID`) and gradients are not supported. Turn on "Ignore Map's Colors" in the settings to ignore them.

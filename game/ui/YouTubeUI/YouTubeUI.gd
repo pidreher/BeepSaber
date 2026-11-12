@@ -16,6 +16,7 @@ signal song_selected(video_metadata)
 var _video_idx_by_id := {}
 
 var selected_video_metadata = null
+var _awaiting_keyboard := false
 
 func _ready() -> void:
 	UI_AudioEngine.attach_children(self)
@@ -24,6 +25,7 @@ func _ready() -> void:
 
 # override hide() method to handle case where UI is inside a OQ_UI2DCanvas
 func _hide() -> void:
+	_awaiting_keyboard = false
 	var parent_canvas: Node = self
 	while parent_canvas != null:
 		if parent_canvas is OQ_UI2DCanvas:
@@ -103,35 +105,38 @@ func _on_ThumbnailRequestPool_request_complete(result: int, response_code: int, 
 			# leave default thumbnail
 			return
 		
-		var img_tex := ImageTexture.new()
-		img_tex.create_from_image(img)
 		var size := img.get_size()
 		size = size * 100.0 / img.get_height()# resize to max height of 100px
-		img_tex.set_size_override(size)
+		img.resize(int(size.x), int(size.y))
+		var img_tex := ImageTexture.create_from_image(img)
 		
 		var item_idx = _video_idx_by_id[user_data['id']]
 		results_list.set_item_icon(item_idx, img_tex)
 	else:
-		vr.log_error('received error code from thumbnail request' % response_code)
+		vr.log_error('received error code %d from thumbnail request' % response_code)
 
 
 func _on_SelectSongButton_pressed() -> void:
 	song_selected.emit(selected_video_metadata)
-	self.hide()
+	_hide()
 
 func _on_BackButton_pressed() -> void:
-	self.hide()
+	_hide()
 
 func _on_ResultsList_item_selected(index: int) -> void:
 	selected_video_metadata = results_list.get_item_metadata(index)
 	select_song_button.disabled = false
 
 func _on_SearchLineEdit_focus_entered() -> void:
+	keyboard.set_meta(&"search_owner", self)
+	_awaiting_keyboard = true
 	keyboard._show()
 
 func _on_keybaord_text_input_enter(text: String) -> void:
 	# only handle text inputs while the UI is visible
 	# Note: we could be sharing the keyboard with other dialogs too. Should
 	# probably handle this a litte more ellegantly at some point...
-	if visible:
+	if _awaiting_keyboard and keyboard.get_meta(&"search_owner", null) == self:
+		_awaiting_keyboard = false
+		keyboard._hide()
 		search_line_edit.text = text

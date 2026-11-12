@@ -20,7 +20,7 @@ const CHARACTERISTIC_NAMES := {
 	"Legacy": "Legacy",
 }
 
-# mods the game can play (keep in sync with MainMenu.SUPPORTED_MAP_MODS)
+# mods the game can play (keep in sync with SongDetails.SUPPORTED_MAP_MODS)
 const MOD_CHROMA := "Chroma"
 const MOD_ME := "Mapping Extensions"
 const MOD_NOODLE := "Noodle Extensions"

@@ -3,11 +3,17 @@
 [ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1_s34gr"]
 [ext_resource type="Script" path="res://game/ui/BeatSaverPanel/BeatSaverPanel.gd" id="2"]
 [ext_resource type="PackedScene" path="res://game/vr_slider.tscn" id="3"]
-[ext_resource type="Texture2D" path="res://game/data/beepsaber_logo.png" id="5"]
+[ext_resource type="PackedScene" path="res://game/ui/SongDetails/SongDetails.tscn" id="6_details"]
 
-[node name="BeatSaverPanel" type="Panel"]
-offset_right = 1800.0
-offset_bottom = 1000.0
+[node name="BeatSaverPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1744.0
+offset_bottom = 880.0
+grow_horizontal = 2
+grow_vertical = 2
 theme = ExtResource("1_s34gr")
 script = ExtResource("2")
 
@@ -18,10 +24,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="VBox" type="VBoxContainer" parent="Layout"]
 layout_mode = 2
@@ -67,12 +73,6 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 68)
 layout_mode = 2
 fit_to_longest_item = false
-
-[node name="CloseButton" type="Button" parent="Layout/VBox/TopBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 68)
-layout_mode = 2
-text = "Close"
 
 [node name="Body" type="HBoxContainer" parent="Layout/VBox"]
 layout_mode = 2
@@ -139,139 +139,10 @@ toggle_mode = true
 button_pressed = true
 text = "Filters"
 
-[node name="DetailsPage" type="VBoxContainer" parent="Layout/VBox/Body/Right"]
+[node name="Details" parent="Layout/VBox/Body/Right" instance=ExtResource("6_details")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 14
-
-[node name="SongCard" type="PanelContainer" parent="Layout/VBox/Body/Right/DetailsPage"]
-layout_mode = 2
-theme_type_variation = &"Card"
-
-[node name="SongRow" type="HBoxContainer" parent="Layout/VBox/Body/Right/DetailsPage/SongCard"]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="DetailCover" type="TextureRect" parent="Layout/VBox/Body/Right/DetailsPage/SongCard/SongRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(176, 176)
-layout_mode = 2
-size_flags_vertical = 0
-texture = ExtResource("5")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="SongText" type="VBoxContainer" parent="Layout/VBox/Body/Right/DetailsPage/SongCard/SongRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
-
-[node name="DetailTitle" type="Label" parent="Layout/VBox/Body/Right/DetailsPage/SongCard/SongRow/SongText"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_type_variation = &"HeaderLabel"
-theme_override_font_sizes/font_size = 32
-text = "Title"
-autowrap_mode = 3
-max_lines_visible = 2
-text_overrun_behavior = 3
-
-[node name="DetailArtist" type="Label" parent="Layout/VBox/Body/Right/DetailsPage/SongCard/SongRow/SongText"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Artist"
-text_overrun_behavior = 3
-
-[node name="DetailMapper" type="Label" parent="Layout/VBox/Body/Right/DetailsPage/SongCard/SongRow/SongText"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.78, 0.86, 1)
-theme_override_font_sizes/font_size = 24
-text = "Mapped by"
-text_overrun_behavior = 3
-
-[node name="DetailBadges" type="HFlowContainer" parent="Layout/VBox/Body/Right/DetailsPage/SongCard/SongRow/SongText"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 6
-
-[node name="StatsGrid" type="GridContainer" parent="Layout/VBox/Body/Right/DetailsPage"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/h_separation = 18
-theme_override_constants/v_separation = 6
-columns = 4
-
-[node name="Diffs" type="RichTextLabel" parent="Layout/VBox/Body/Right/DetailsPage"]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 2
-bbcode_enabled = true
-fit_content = true
-scroll_active = false
-
-[node name="Description" type="RichTextLabel" parent="Layout/VBox/Body/Right/DetailsPage"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/default_color = Color(0.74, 0.78, 0.86, 1)
-theme_override_font_sizes/normal_font_size = 24
-text = "Description"
-
-[node name="DownloadStatus" type="HBoxContainer" parent="Layout/VBox/Body/Right/DetailsPage"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-
-[node name="DownloadProgress" type="ProgressBar" parent="Layout/VBox/Body/Right/DetailsPage/DownloadStatus"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 36)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-max_value = 1.0
-show_percentage = false
-
-[node name="DownloadLabel" type="Label" parent="Layout/VBox/Body/Right/DetailsPage/DownloadStatus"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "0%"
-horizontal_alignment = 2
-
-[node name="Actions" type="HBoxContainer" parent="Layout/VBox/Body/Right/DetailsPage"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="PreviewButton" type="Button" parent="Layout/VBox/Body/Right/DetailsPage/Actions"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 76)
-layout_mode = 2
-text = "Preview"
-
-[node name="MapperButton" type="Button" parent="Layout/VBox/Body/Right/DetailsPage/Actions"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 76)
-layout_mode = 2
-tooltip_text = "More maps by this mapper"
-text = "Mapper"
-
-[node name="DownloadButton" type="Button" parent="Layout/VBox/Body/Right/DetailsPage/Actions"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 76)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"PlayButton"
-theme_override_font_sizes/font_size = 30
-text = "Download"
 
 [node name="FiltersPage" type="ScrollContainer" parent="Layout/VBox/Body/Right"]
 unique_name_in_owner = true
@@ -450,9 +321,6 @@ scroll_node_path = NodePath("../Layout/VBox/Body/ResultsCard/Results")
 
 [node name="filters_slider" parent="." instance=ExtResource("3")]
 scroll_node_path = NodePath("../Layout/VBox/Body/Right/FiltersPage")
-
-[node name="description_slider" parent="." instance=ExtResource("3")]
-scroll_node_path = NodePath("../Layout/VBox/Body/Right/DetailsPage/Description")
 
 [node name="SearchRequest" type="HTTPRequest" parent="."]
 timeout = 20.0

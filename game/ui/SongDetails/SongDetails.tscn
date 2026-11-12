@@ -1,0 +1,212 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/ui/SongDetails/SongDetails.gd" id="1_det"]
+[ext_resource type="Texture2D" path="res://game/data/beepsaber_logo.png" id="2_logo"]
+[ext_resource type="PackedScene" path="res://game/vr_slider.tscn" id="3_slider"]
+
+[node name="SongDetails" type="VBoxContainer"]
+custom_minimum_size = Vector2(560, 0)
+offset_right = 660.0
+offset_bottom = 760.0
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+script = ExtResource("1_det")
+
+[node name="SongCard" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Card"
+
+[node name="SongRow" type="HBoxContainer" parent="SongCard"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Cover" type="TextureRect" parent="SongCard/SongRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(176, 176)
+layout_mode = 2
+size_flags_vertical = 0
+texture = ExtResource("2_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SongText" type="VBoxContainer" parent="SongCard/SongRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TitleRow" type="HBoxContainer" parent="SongCard/SongRow/SongText"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="SongCard/SongRow/SongText/TitleRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 32
+text = "Select a song"
+autowrap_mode = 3
+max_lines_visible = 2
+text_overrun_behavior = 3
+
+[node name="FavoriteButton" type="Button" parent="SongCard/SongRow/SongText/TitleRow"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 0
+focus_mode = 0
+tooltip_text = "Add to favorites"
+theme_type_variation = &"IconButton"
+icon_alignment = 1
+
+[node name="SubTitle" type="Label" parent="SongCard/SongRow/SongText"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 24
+text = "Sub title"
+text_overrun_behavior = 3
+
+[node name="Artist" type="Label" parent="SongCard/SongRow/SongText"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Artist"
+text_overrun_behavior = 3
+
+[node name="Mapper" type="Label" parent="SongCard/SongRow/SongText"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.78, 0.86, 1)
+theme_override_font_sizes/font_size = 24
+text = "Mapped by"
+text_overrun_behavior = 3
+
+[node name="Info" type="Label" parent="SongCard/SongRow/SongText"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 24
+text = "Not played yet"
+text_overrun_behavior = 3
+
+[node name="Badges" type="HFlowContainer" parent="SongCard/SongRow/SongText"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="StatsGrid" type="GridContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 6
+columns = 4
+
+[node name="DiffsTitle" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 22
+text = "DIFFICULTIES"
+
+[node name="Diffs" type="RichTextLabel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="Description" type="RichTextLabel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.74, 0.78, 0.86, 1)
+theme_override_font_sizes/normal_font_size = 24
+text = "Description"
+
+[node name="Spacer" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="DownloadStatus" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="DownloadProgress" type="ProgressBar" parent="DownloadStatus"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+show_percentage = false
+
+[node name="DownloadLabel" type="Label" parent="DownloadStatus"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "0%"
+horizontal_alignment = 2
+
+[node name="Actions" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PreviewButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 76)
+layout_mode = 2
+focus_mode = 0
+text = "Preview"
+
+[node name="MapperButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 76)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "More maps by this mapper"
+text = "Mapper"
+
+[node name="DeleteButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 76)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Delete this song (press twice)"
+text = "Delete"
+
+[node name="PrimaryButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"PlayButton"
+theme_override_font_sizes/font_size = 30
+text = "Load"
+
+[node name="description_slider" parent="." instance=ExtResource("3_slider")]
+scroll_node_path = NodePath("../Description")
