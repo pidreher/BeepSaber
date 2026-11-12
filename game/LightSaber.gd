@@ -231,7 +231,7 @@ func _handle_area_collided(area: Area3D) -> void:
 		song_player_ref.get_playback_position()
 	)
 	saber_visual.hit(time_offset)
-	controller.simple_rumble(0.75, 0.1)
+	controller.simple_rumble(1.0, 0.09)
 	
 	var o := controller.global_transform.origin
 	var controller_speed: Vector3 = (saber_end - saber_end_past) / last_dt

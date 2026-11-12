@@ -14,9 +14,15 @@ var activator_cube: BeepCube
 
 var speed: float
 var despawn_z: float
+var _magnet := false
+
+# while the saber follows an active arc the controller vibrates lightly
+const ARC_HAPTIC_DISTANCE := 0.3
+const ARC_HAPTIC_STRENGTH := 0.4
 
 func spawn(info: ArcInfo, current_beat: float, _activator_cube: BeepCube = null) -> void:
 	arc_info = info
+	_magnet = false
 	
 	if abs(arc_info.head_rotation-arc_info.tail_rotation) > Constants.ROTATION_EPS: # or abs(arc_info.tail_rotation) > Constants.ROTATION_EPS:
 		# TODO: arcs will twist if rotations are different
@@ -49,13 +55,32 @@ func _on_activator_cube_cutted(correct_saber: bool) -> void:
 
 # sets the magnet version of the material (and ensures correct magnet parameter)
 func start_magnet() -> void:
+	_magnet = true
 	visual.material_override = right_material_magnet if arc_info.color == 1 else left_material_magnet
 	visual.material_override.set_shader_parameter(&"saber_magnet", arc_info.color+1)
 
 func _process(delta: float) -> void:
 	if Scoreboard.paused or not is_visible_in_tree() or not Map.current_info: return
 	transform.origin += speed * delta * transform.basis.z
+	if _magnet:
+		_update_haptics()
 	if transform.origin.dot(transform.basis.z) >= despawn_z:
 		if activator_cube and activator_cube.cutted.is_connected(_on_activator_cube_cutted):
 			activator_cube.cutted.disconnect(_on_activator_cube_cutted)
 		queue_free()
+
+func _update_haptics() -> void:
+	var game := GlobalReferences.main_game_scene
+	if game == null: return
+	var saber := game.right_saber if arc_info.color == 1 else game.left_saber
+	var controller := game.right_controller if arc_info.color == 1 else game.left_controller
+	# don't override stronger rumbles (e.g. from cutting a cube)
+	if not saber.is_extended() or controller.is_simple_rumbling(): return
+	var path := $Path3D as Path3D
+	var base := saber.global_transform.origin
+	var tip := saber.saber_visual.tip.global_transform.origin
+	for t in [1.0, 0.75, 0.5]:
+		var p := path.to_local(base.lerp(tip, t))
+		if path.curve.get_closest_point(p).distance_to(p) < ARC_HAPTIC_DISTANCE:
+			controller.simple_rumble(ARC_HAPTIC_STRENGTH, 0.05)
+			return

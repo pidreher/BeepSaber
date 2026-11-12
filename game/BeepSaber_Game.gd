@@ -115,6 +115,7 @@ func start_map(info: MapInfo, map_difficulty: DifficultyInfo) -> void:
 			wav.set_data(data)
 			song_player.stream = wav
 	
+	_reset_fail_effect()
 	_audio_synced_after_restart = false
 	song_player.play(0.0)
 	song_player.volume_db = 0.0
@@ -133,13 +134,48 @@ func start_map(info: MapInfo, map_difficulty: DifficultyInfo) -> void:
 	_transition_game_state(gamestate_playing)
 
 func update_health(delta: float) -> void:
-	if Settings.health_mode:
+	if Settings.health_mode and not _failing:
 		current_health += delta
 		if current_health > Constants.HEALTH_MAX:
 			current_health = Constants.HEALTH_MAX
 		percent_indicator.update_percent(current_health / Constants.HEALTH_MAX)
 		if current_health < 0:
-			_on_song_ended()
+			_fail_song()
+
+# Failing a song: instead of cutting straight to the score screen, the music
+# "tape-stops" while the whole game slows down, the lights flash red and die
+# and a power-down sound plays.
+const FAIL_DURATION := 1.6
+var _failing := false
+var _fail_player: AudioStreamPlayer
+
+func _fail_song() -> void:
+	if _failing: return
+	_failing = true
+	if _fail_player == null:
+		_fail_player = AudioStreamPlayer.new()
+		_fail_player.stream = preload("res://game/data/sfx/fail.wav")
+		_fail_player.bus = &"SFX"
+		add_child(_fail_player)
+	_fail_player.play()
+	for controller: BeepSaberController in [left_controller, right_controller]:
+		controller.simple_rumble(1.0, 0.6)
+	for light_type in 5:
+		event_driver.flash_light_then_fade_off(light_type, Color(1.0, 0.08, 0.05))
+	var tween := create_tween().set_ignore_time_scale(true).set_parallel()
+	tween.tween_property(song_player, ^"pitch_scale", song_player.pitch_scale * 0.15, FAIL_DURATION) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(song_player, ^"volume_db", -40.0, FAIL_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(Engine, ^"time_scale", 0.15, FAIL_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await tween.finished
+	_reset_fail_effect()
+	if gamestate == gamestate_playing:
+		_on_song_ended()
+
+func _reset_fail_effect() -> void:
+	_failing = false
+	Engine.time_scale = 1.0
+	song_player.pitch_scale = Settings.music_speed / 100.
 			
 # This function will transitioning the game from it's current state into
 # the provided 'next_state'.
@@ -215,8 +251,6 @@ func _check_and_update_saber(controller: BeepSaberController, saber: LightSaber)
 		elif saber.get_overlapping_areas().size() > 0 or saber.get_overlapping_bodies().size() > 0:
 			# strong rumble when saber is cutting into wall or other saber
 			controller.simple_rumble(0.5, 0.1)
-		else:
-			controller.simple_rumble(0.0, 0.1)
 
 
 func _physics_process(_dt: float) -> void:

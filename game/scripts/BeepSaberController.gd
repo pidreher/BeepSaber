@@ -72,7 +72,12 @@ var _rumble_duration_remaining := 0.0
 func simple_rumble(intensity: float, duration: float) -> void:
 	_rumble_duration_remaining = duration;
 	_is_simple_rumbling = true
-	trigger_haptic_pulse("haptic", 20, intensity, duration, 0)
+	# a zero amplitude pulse would only cut other vibrations short
+	if intensity > 0.0:
+		# frequency 0 = XR_FREQUENCY_UNSPECIFIED: the runtime drives the motor at
+		# its optimal frequency. The previous 20 Hz is far below the resonance of
+		# controller vibration motors and made every hit feel weak.
+		trigger_haptic_pulse("haptic", 0.0, intensity, duration, 0)
 	
 func is_simple_rumbling() -> bool:
 	return _is_simple_rumbling
