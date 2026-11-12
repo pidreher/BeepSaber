@@ -18,9 +18,9 @@ var _magnet := false
 
 # while the saber follows an active arc the controller vibrates; it starts
 # softly when the saber gets near the arc and ramps up to full strength on it
-const ARC_HAPTIC_START_DISTANCE := 0.7
-const ARC_HAPTIC_FULL_DISTANCE := 0.06
-const ARC_HAPTIC_MIN := 0.15
+const ARC_HAPTIC_START_DISTANCE := 0.9
+const ARC_HAPTIC_FULL_DISTANCE := 0.1
+const ARC_HAPTIC_MIN := 0.4
 const ARC_HAPTIC_MAX := 1.0
 
 func spawn(info: ArcInfo, current_beat: float, _activator_cube: BeepCube = null) -> void:
@@ -87,4 +87,4 @@ func _update_haptics() -> void:
 		distance = minf(distance, path.curve.get_closest_point(p).distance_to(p))
 	if distance > ARC_HAPTIC_START_DISTANCE: return
 	var closeness := 1.0 - clampf((distance - ARC_HAPTIC_FULL_DISTANCE) / (ARC_HAPTIC_START_DISTANCE - ARC_HAPTIC_FULL_DISTANCE), 0.0, 1.0)
-	controller.rumble_at_least(lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness * closeness), 0.05)
+	controller.rumble_at_least(lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness), 0.05)

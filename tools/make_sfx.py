@@ -51,17 +51,27 @@ def save(name: str, x: np.ndarray) -> None:
 
 
 def hit() -> np.ndarray:
-    """Cube cut: transient click + punchy low thump + 'tshk' slice + metallic shimmer."""
-    t = t_axis(0.38)
-    click = band(rng.standard_normal(t.size), 2500, None) * np.exp(-t / 0.0015)
-    thump = glide_sine(55 + 150 * np.exp(-t / 0.018)) * np.exp(-t / 0.075)
-    slice_env = (1 - np.exp(-t / 0.002)) * np.exp(-t / 0.055)
-    slice_ = band(rng.standard_normal(t.size), 2200, 10000) * slice_env
-    shimmer = sum(
-        a * np.sin(2 * np.pi * f * t + rng.uniform(0, 2 * np.pi)) * np.exp(-t / d)
-        for f, a, d in [(1870, 0.10, 0.14), (2950, 0.08, 0.11), (4310, 0.06, 0.09), (6020, 0.04, 0.07)]
-    )
-    return finish(0.55 * click + 1.0 * thump + 0.55 * slice_ + shimmer)
+    """Cube cut: a dull clap + stomp on impact, then a short electric zap for the slice."""
+    t = t_axis(0.32)
+    # stomp: low thump gliding down
+    stomp = glide_sine(50 + 90 * np.exp(-t / 0.02)) * np.exp(-t / 0.085)
+    # clap: band-passed noise with a few quick micro-bursts like a real hand clap
+    clap_env = sum(np.exp(-np.clip(t - d, 0, None) / 0.004) * (t >= d) * a
+                   for d, a in [(0.0, 1.0), (0.007, 0.8), (0.015, 0.6)])
+    clap_env = clap_env + 0.35 * np.exp(-t / 0.045)
+    clap = band(rng.standard_normal(t.size), 800, 2600) * clap_env
+    # zap: buzzy descending saw sweep with a little FM wobble, starting right after the hit
+    zt = np.clip(t - 0.035, 0, None)
+    f = 420 + 1300 * np.exp(-zt / 0.045)
+    f = f * (1 + 0.08 * np.sin(2 * np.pi * 70 * zt))
+    phase = np.cumsum(f) / SR
+    saw = 2 * (phase % 1.0) - 1
+    zap_env = (t >= 0.035) * (1 - np.exp(-zt / 0.004)) * np.exp(-zt / 0.06)
+    crackle = band(rng.standard_normal(t.size), 1500, 5000) * zap_env * 0.25
+    zap = band(saw, None, 3200) * zap_env + crackle
+    x = 1.1 * stomp + 0.8 * clap + 0.45 * zap
+    x = band(x, None, 6500, order=2)  # keep it dull rather than crisp
+    return finish(x, drive=1.6)
 
 
 def fail() -> np.ndarray:

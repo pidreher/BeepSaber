@@ -38,8 +38,8 @@ uniform lowp float bg_3_intensity_mult = 1.0;
 uniform lowp float bg_4_intensity_mult = 1.0;
 // light tinted haze (set by event_driver.gd), strongest around the horizon
 uniform lowp vec4 haze_color : source_color = vec4(0.02, 0.025, 0.05, 1.0);
-uniform lowp float haze_amount = 0.7;
-uniform lowp float bg_dim = 0.5;
+uniform lowp float haze_amount = 0.8;
+uniform lowp float bg_dim = 0.32;
 
 vec3 get_from_map(sampler2D maptx, vec2 uv, float intensity, vec3 albedo, vec4 tint){
 	vec3 map = texture(maptx,uv).rgb;

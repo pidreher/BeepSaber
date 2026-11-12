@@ -51,8 +51,10 @@ void fragment() {
 	float magnet_fade = clamp(smoothstep(distance_fade_magnet_max, distance_fade_magnet_min, distance_fade_magnet_max+distance_fade_magnet_min - dist), 0.0, 1.0);
 	float tip_fade = clamp(smoothstep(distance_fade_tip_min, distance_fade_tip_max, tip_dist), 0.0, 1.0);
 	ALPHA = color.a * min(min(fade, magnet_fade), tip_fade);
-	ALPHA *= clamp(pow(texture(noise, UV*noise_scale+vec2(TIME*noise_speed,0.0)).r, noise_pow) * noise_mult, 0.0, 1.0);
+	// the noise only modulates the arc instead of erasing most of it
+	float n = clamp(pow(texture(noise, UV*noise_scale+vec2(TIME*noise_speed,0.0)).r, noise_pow) * noise_mult, 0.0, 1.0);
+	ALPHA *= mix(0.55, 1.0, n);
 	ALBEDO = color.rgb;
-	EMISSION = color.rgb * emission;
+	EMISSION = color.rgb * emission * (2.2 + 1.5 * n);
 
 }

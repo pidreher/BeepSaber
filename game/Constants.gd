@@ -1,9 +1,9 @@
 extends Node
 
-const DEFAULT_LANE_ZERO_X := -0.9
+const DEFAULT_LANE_ZERO_X := -0.975 # -1.5 * DEFAULT_LANE_DISTANCE_X
 const LAYER_ZERO_Y := 0.8
 const BEAT_DISTANCE := 4.0
-const DEFAULT_LANE_DISTANCE_X := 0.6
+const DEFAULT_LANE_DISTANCE_X := 0.65
 const LANE_DISTANCE_Y := 0.6
 const MISS_Z := 2.5
 const DIRECTION8_OFFSET := 2 * TAU 
