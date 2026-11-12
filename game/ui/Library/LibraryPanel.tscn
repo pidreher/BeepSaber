@@ -1,0 +1,84 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1_theme"]
+[ext_resource type="Script" path="res://game/ui/Library/LibraryPanel.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://game/ui/Library/LocalSongsPanel.tscn" id="3_local"]
+[ext_resource type="PackedScene" uid="uid://383dbnh6gxd3" path="res://game/ui/BeatSaverPanel/BeatSaverPanel.tscn" id="4_beatsaver"]
+
+[node name="LibraryPanel" type="Panel"]
+offset_right = 1800.0
+offset_bottom = 1040.0
+theme = ExtResource("1_theme")
+script = ExtResource("2_script")
+
+[node name="Layout" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="Layout"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TabBar" type="HBoxContainer" parent="Layout/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Layout/VBox/TabBar"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 24
+text = "LIBRARY"
+
+[node name="MySongsTab" type="Button" parent="Layout/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 68)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+button_pressed = true
+text = "My Songs"
+
+[node name="BeatSaverTab" type="Button" parent="Layout/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 68)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+text = "BeatSaver"
+
+[node name="Spacer" type="Control" parent="Layout/VBox/TabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="MoreSourcesButton" type="Button" parent="Layout/VBox/TabBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Other map sources: Beat Sage (AI generated maps from YouTube songs)"
+text = "More sources…"
+
+[node name="Pages" type="MarginContainer" parent="Layout/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LocalSongs" parent="Layout/VBox/Pages" instance=ExtResource("3_local")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BeatSaver" parent="Layout/VBox/Pages" instance=ExtResource("4_beatsaver")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2

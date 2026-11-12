@@ -2,12 +2,12 @@
 
 [ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1"]
 [ext_resource type="Script" uid="uid://cbe53qn50sjl7" path="res://game/BeepSaberMainMenu.gd" id="3"]
-[ext_resource type="Texture2D" uid="uid://cviyxvrpvyr0g" path="res://game/data/beepsaber_logo.png" id="3_wpmn0"]
-[ext_resource type="PackedScene" uid="uid://dtipmx5ep1dkk" path="res://game/vr_slider.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://game/ui/SongDetails/SongDetails.tscn" id="4_details"]
+[ext_resource type="PackedScene" uid="uid://dtipmx5ep1dkk" path="res://game/vr_slider.tscn" id="5_slider"]
 
 [node name="BeepSaberMainMenu" type="Panel"]
-offset_right = 1600.0
-offset_bottom = 880.0
+offset_right = 1400.0
+offset_bottom = 760.0
 theme = ExtResource("1")
 script = ExtResource("3")
 
@@ -19,7 +19,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 32
+theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 28
 
@@ -30,56 +30,62 @@ theme_override_constants/separation = 32
 [node name="Left" type="VBoxContainer" parent="Layout/Columns"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.2
 theme_override_constants/separation = 18
 
-[node name="Header" type="HBoxContainer" parent="Layout/Columns/Left"]
+[node name="NowPlayingLabel" type="Label" parent="Layout/Columns/Left"]
 layout_mode = 2
-
-[node name="Search_Button" type="Button" parent="Layout/Columns/Left/Header"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 64)
-layout_mode = 2
-text = "Search"
-
-[node name="SearchFilter_Label" type="Label" parent="Layout/Columns/Left/Header"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
 theme_type_variation = &"MutedLabel"
-theme_override_font_sizes/font_size = 26
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
+theme_override_font_sizes/font_size = 24
+text = "NOW PLAYING"
 
-[node name="PlaylistSelector" type="OptionButton" parent="Layout/Columns/Left/Header"]
+[node name="SongCard" parent="Layout/Columns/Left" instance=ExtResource("4_details")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(270, 64)
+custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
-fit_to_longest_item = false
+size_flags_vertical = 0
+compact = true
 
-[node name="SongsMenu" type="ItemList" parent="Layout/Columns/Left"]
+[node name="DifficultyCard" type="PanelContainer" parent="Layout/Columns/Left"]
+layout_mode = 2
+theme_type_variation = &"Card"
+
+[node name="DiffBox" type="VBoxContainer" parent="Layout/Columns/Left/DifficultyCard"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DiffTitle" type="Label" parent="Layout/Columns/Left/DifficultyCard/DiffBox"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 24
+text = "DIFFICULTY"
+
+[node name="CharacteristicRow" type="HFlowContainer" parent="Layout/Columns/Left/DifficultyCard/DiffBox"]
 unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="DifficultyRow" type="HFlowContainer" parent="Layout/Columns/Left/DifficultyCard/DiffBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="Spacer" type="Control" parent="Layout/Columns/Left"]
 layout_mode = 2
 size_flags_vertical = 3
-max_text_lines = 2
-text_overrun_behavior = 3
-fixed_icon_size = Vector2i(84, 84)
+mouse_filter = 2
 
-[node name="Footer" type="HBoxContainer" parent="Layout/Columns/Left"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="LoadPlaylists_Button" type="Button" parent="Layout/Columns/Left/Footer"]
-custom_minimum_size = Vector2(180, 80)
-layout_mode = 2
-text = "Refresh"
-
-[node name="Play_Button" type="Button" parent="Layout/Columns/Left/Footer"]
+[node name="Play_Button" type="Button" parent="Layout/Columns/Left"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 80)
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 2
-size_flags_horizontal = 3
+focus_mode = 0
 theme_type_variation = &"PlayButton"
+theme_override_font_sizes/font_size = 40
 text = "Play"
 
 [node name="Right" type="VBoxContainer" parent="Layout/Columns"]
@@ -87,79 +93,16 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 18
 
-[node name="SongCard" type="PanelContainer" parent="Layout/Columns/Right"]
-layout_mode = 2
-theme_type_variation = &"Card"
-
-[node name="SongRow" type="HBoxContainer" parent="Layout/Columns/Right/SongCard"]
-layout_mode = 2
-theme_override_constants/separation = 24
-
-[node name="cover" type="TextureRect" parent="Layout/Columns/Right/SongCard/SongRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 200)
-layout_mode = 2
-size_flags_vertical = 0
-texture = ExtResource("3_wpmn0")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="SongText" type="VBoxContainer" parent="Layout/Columns/Right/SongCard/SongRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="TitleRow" type="HBoxContainer" parent="Layout/Columns/Right/SongCard/SongRow/SongText"]
-layout_mode = 2
-
-[node name="SongTitle_Label" type="Label" parent="Layout/Columns/Right/SongCard/SongRow/SongText/TitleRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"HeaderLabel"
-text = "Open Saber"
-autowrap_mode = 3
-max_lines_visible = 2
-
-[node name="Favorite_Button" type="Button" parent="Layout/Columns/Right/SongCard/SongRow/SongText/TitleRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 64)
-layout_mode = 2
-size_flags_vertical = 0
-tooltip_text = "Favorite"
-theme_type_variation = &"IconButton"
-icon_alignment = 1
-
-[node name="SongInfo_Label" type="Label" parent="Layout/Columns/Right/SongCard/SongRow/SongText"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.78, 0.86, 1)
-theme_override_font_sizes/font_size = 24
-text = "Select a song"
-autowrap_mode = 3
-
-[node name="DifficultyMenu" type="ItemList" parent="Layout/Columns/Right"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 76)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-auto_height = true
-max_columns = 0
-same_column_width = true
-text_overrun_behavior = 3
-
 [node name="ModsCard" type="PanelContainer" parent="Layout/Columns/Right"]
 layout_mode = 2
 theme_type_variation = &"Card"
 
 [node name="ModsBox" type="VBoxContainer" parent="Layout/Columns/Right/ModsCard"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 
 [node name="ModsHeader" type="HBoxContainer" parent="Layout/Columns/Right/ModsCard/ModsBox"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 
 [node name="ModsTitle" type="Label" parent="Layout/Columns/Right/ModsCard/ModsBox/ModsHeader"]
@@ -172,123 +115,135 @@ vertical_alignment = 1
 
 [node name="Reset_Button" type="Button" parent="Layout/Columns/Right/ModsCard/ModsBox/ModsHeader"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 48)
+custom_minimum_size = Vector2(130, 56)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
 text = "Reset"
 
-[node name="Toggles" type="HFlowContainer" parent="Layout/Columns/Right/ModsCard/ModsBox"]
+[node name="Toggles" type="GridContainer" parent="Layout/Columns/Right/ModsCard/ModsBox"]
 layout_mode = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 4
+columns = 2
 
 [node name="Health" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Health"
-
-[node name="Bombs" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Bombs"
-
-[node name="Arrows" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Arrows"
-
-[node name="Claws" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Short Sword"
-
-[node name="Options" type="GridContainer" parent="Layout/Columns/Right/ModsCard/ModsBox"]
-layout_mode = 2
-columns = 3
-
-[node name="Size" type="OptionButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Options"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-theme_override_constants/arrow_margin = 8
+focus_mode = 0
+text = "Health"
+
+[node name="Bombs" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Bombs"
+
+[node name="Arrows" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Arrows"
+
+[node name="Claws" type="CheckButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Toggles"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Short Sword"
+
+[node name="Options" type="GridContainer" parent="Layout/Columns/Right/ModsCard/ModsBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 2
+
+[node name="Size" type="OptionButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Options"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
 fit_to_longest_item = false
 text_overrun_behavior = 3
 
 [node name="Width" type="OptionButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Options"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-theme_override_constants/arrow_margin = 8
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
 fit_to_longest_item = false
 text_overrun_behavior = 3
 
 [node name="Speed" type="OptionButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Options"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-theme_override_constants/arrow_margin = 8
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
 fit_to_longest_item = false
 text_overrun_behavior = 3
 
 [node name="Flip" type="OptionButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Options"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-theme_override_constants/arrow_margin = 8
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
 fit_to_longest_item = false
 text_overrun_behavior = 3
 
 [node name="Handedness" type="OptionButton" parent="Layout/Columns/Right/ModsCard/ModsBox/Options"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-theme_override_constants/arrow_margin = 8
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
 fit_to_longest_item = false
 text_overrun_behavior = 3
 
 [node name="Spacer" type="Control" parent="Layout/Columns/Right"]
 layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 2
 
 [node name="BottomRow" type="HBoxContainer" parent="Layout/Columns/Right"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Delete_Button" type="Button" parent="Layout/Columns/Right/BottomRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 68)
-layout_mode = 2
-disabled = true
-text = "Delete"
-
-[node name="BottomSpacer" type="Control" parent="Layout/Columns/Right/BottomRow"]
+[node name="Settings_Button" type="Button" parent="Layout/Columns/Right/BottomRow"]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 size_flags_horizontal = 3
+focus_mode = 0
+text = "Settings"
 
 [node name="Licenses" type="Button" parent="Layout/Columns/Right/BottomRow"]
-custom_minimum_size = Vector2(140, 68)
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
 text = "Licenses"
-
-[node name="Settings_Button" type="Button" parent="Layout/Columns/Right/BottomRow"]
-custom_minimum_size = Vector2(140, 68)
-layout_mode = 2
-text = "Settings"
 
 [node name="Exit_Button" type="Button" parent="Layout/Columns/Right/BottomRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 68)
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
 text = "Exit"
 
 [node name="InfoRow" type="HBoxContainer" parent="Layout/Columns/Right"]
@@ -296,9 +251,11 @@ layout_mode = 2
 
 [node name="upload_url" type="Label" parent="Layout/Columns/Right/InfoRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
 
 [node name="version" type="Label" parent="Layout/Columns/Right/InfoRow"]
@@ -306,6 +263,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 8
 theme_type_variation = &"MutedLabel"
+theme_override_font_sizes/font_size = 24
 text = "0.0.0"
 
 [node name="song_prev" type="AudioStreamPlayer" parent="."]
@@ -315,39 +273,30 @@ bus = &"MusicPreview"
 [node name="stop_prev" type="Timer" parent="song_prev"]
 one_shot = true
 
-[node name="song_vr_slider" parent="." instance=ExtResource("6")]
-scroll_node_path = NodePath("../Layout/Columns/Left/SongsMenu")
-
-[node name="diff_vr_slider" parent="." instance=ExtResource("6")]
-scroll_node_path = NodePath("../Layout/Columns/Right/DifficultyMenu")
-
 [node name="LicensePopup" type="PopupPanel" parent="."]
 unique_name_in_owner = true
 title = "Licenses"
-position = Vector2i(820, 40)
-size = Vector2i(740, 800)
+position = Vector2i(330, 40)
+size = Vector2i(740, 680)
 
 [node name="ScrollContainer" type="ScrollContainer" parent="LicensePopup"]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 720.0
-offset_bottom = 780.0
+offset_bottom = 660.0
 horizontal_scroll_mode = 0
 
 [node name="Label" type="Label" parent="LicensePopup/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "LICENSES"
 autowrap_mode = 2
 
-[connection signal="pressed" from="Layout/Columns/Left/Header/Search_Button" to="." method="_on_Search_Button_button_up"]
-[connection signal="item_selected" from="Layout/Columns/Left/Header/PlaylistSelector" to="." method="_on_PlaylistSelector_item_selected"]
-[connection signal="item_selected" from="Layout/Columns/Left/SongsMenu" to="." method="_select_song"]
-[connection signal="pressed" from="Layout/Columns/Left/Footer/LoadPlaylists_Button" to="." method="_on_LoadPlaylists_Button_pressed"]
-[connection signal="pressed" from="Layout/Columns/Left/Footer/Play_Button" to="." method="_on_Play_Button_pressed"]
-[connection signal="pressed" from="Layout/Columns/Right/SongCard/SongRow/SongText/TitleRow/Favorite_Button" to="." method="_on_favorite_button_pressed"]
-[connection signal="item_selected" from="Layout/Columns/Right/DifficultyMenu" to="." method="_select_difficulty"]
+[node name="license_vr_slider" parent="." instance=ExtResource("5_slider")]
+scroll_node_path = NodePath("../LicensePopup/ScrollContainer")
+
+[connection signal="pressed" from="Layout/Columns/Left/Play_Button" to="." method="_on_Play_Button_pressed"]
 [connection signal="pressed" from="Layout/Columns/Right/ModsCard/ModsBox/ModsHeader/Reset_Button" to="." method="_on_reset_button_pressed"]
 [connection signal="toggled" from="Layout/Columns/Right/ModsCard/ModsBox/Toggles/Health" to="." method="_on_health_toggled"]
 [connection signal="toggled" from="Layout/Columns/Right/ModsCard/ModsBox/Toggles/Bombs" to="." method="_on_bombs_toggled"]
@@ -358,8 +307,7 @@ autowrap_mode = 2
 [connection signal="item_selected" from="Layout/Columns/Right/ModsCard/ModsBox/Options/Speed" to="." method="_on_speed_item_selected"]
 [connection signal="item_selected" from="Layout/Columns/Right/ModsCard/ModsBox/Options/Flip" to="." method="_on_flip_item_selected"]
 [connection signal="item_selected" from="Layout/Columns/Right/ModsCard/ModsBox/Options/Handedness" to="." method="_on_handedness_item_selected"]
-[connection signal="pressed" from="Layout/Columns/Right/BottomRow/Delete_Button" to="." method="_on_Delete_Button_button_up"]
-[connection signal="pressed" from="Layout/Columns/Right/BottomRow/Licenses" to="." method="_on_licenses_pressed"]
 [connection signal="pressed" from="Layout/Columns/Right/BottomRow/Settings_Button" to="." method="_on_Settings_Button_pressed"]
+[connection signal="pressed" from="Layout/Columns/Right/BottomRow/Licenses" to="." method="_on_licenses_pressed"]
 [connection signal="pressed" from="Layout/Columns/Right/BottomRow/Exit_Button" to="." method="_on_Exit_Button_pressed"]
 [connection signal="timeout" from="song_prev/stop_prev" to="." method="_on_stop_prev_timeout"]

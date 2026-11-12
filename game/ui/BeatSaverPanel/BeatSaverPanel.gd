@@ -1,8 +1,14 @@
 # In-game BeatSaver browser, modelled after the PC mod "BetterSongSearch":
 # search the BeatSaver catalog with filters and sorting, see the important
 # facts of every map at a glance, preview and download with one click.
-extends Panel
+# It is the "BeatSaver" tab of the library panel (game/ui/Library); the
+# selected map is shown in the shared SongDetails pane, which offers "Load"
+# once the map is downloaded.
+extends Control
 class_name BeatSaverPanel
+
+# the player wants to play a downloaded map (the library switches to it)
+signal load_requested(version_hash: String)
 
 const API_URL := "https://api.beatsaver.com/search/text/%d?%s"
 const PAGE_SIZE := 20
@@ -19,9 +25,10 @@ const HTTP_HEADERS: PackedStringArray = ["User-Agent: OpenSaber (in-game map bro
 
 const RowScene := preload("res://game/ui/BeatSaverPanel/BeatSaverMapRow.tscn")
 
-# reference to the main menu (downloaded songs list, song preview player)
-@export var main_menu_ref: MainMenu
-@export var keyboard: OQ_UI2DKeyboard
+# reference to the main menu (downloaded songs list, song preview player);
+# both are passed in by the library with setup()
+var main_menu_ref: MainMenu
+var keyboard: OQ_UI2DKeyboard
 
 # what is being searched: free text and/or the maps of one mapper
 class Query extends RefCounted:
@@ -64,6 +71,7 @@ var _cover_busy := {} # HTTPRequest -> url
 # preview
 var _preview_map: BeatSaverMap = null
 var _preview_shown_playing := true # forces the first button update
+var _preview_shown_map: BeatSaverMap = null
 
 var _awaiting_keyboard := false
 var _updating_controls := false
@@ -79,22 +87,9 @@ var _is_first_show := true
 @onready var load_more_button := %LoadMoreButton as Button
 @onready var details_tab := %DetailsTab as Button
 @onready var filters_tab := %FiltersTab as Button
-@onready var details_page := %DetailsPage as Control
+@onready var details := %Details as SongDetails
+@onready var details_page := details as Control
 @onready var filters_page := %FiltersPage as Control
-@onready var detail_cover := %DetailCover as TextureRect
-@onready var detail_title := %DetailTitle as Label
-@onready var detail_artist := %DetailArtist as Label
-@onready var detail_mapper := %DetailMapper as Label
-@onready var detail_badges := %DetailBadges as HFlowContainer
-@onready var stats_grid := %StatsGrid as GridContainer
-@onready var diffs_label := %Diffs as RichTextLabel
-@onready var description := %Description as RichTextLabel
-@onready var download_status := %DownloadStatus as Control
-@onready var download_progress := %DownloadProgress as ProgressBar
-@onready var download_label := %DownloadLabel as Label
-@onready var preview_button := %PreviewButton as Button
-@onready var mapper_button := %MapperButton as Button
-@onready var download_button := %DownloadButton as Button
 @onready var min_nps := %MinNps as OptionButton
 @onready var max_nps := %MaxNps as OptionButton
 @onready var min_length := %MinLength as OptionButton
@@ -135,8 +130,6 @@ func _ready() -> void:
 	back_button.icon = BeatSaverIcons.get_icon("back")
 	search_button.icon = BeatSaverIcons.get_icon("search")
 	clear_button.icon = BeatSaverIcons.get_icon("close")
-	mapper_button.icon = BeatSaverIcons.get_icon("user")
-	download_button.icon = BeatSaverIcons.get_icon("download")
 	var tab_group := ButtonGroup.new()
 	details_tab.button_group = tab_group
 	filters_tab.button_group = tab_group
@@ -145,13 +138,12 @@ func _ready() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	search_button.pressed.connect(_on_search_pressed)
 	clear_button.pressed.connect(_on_clear_pressed)
-	(%CloseButton as Button).pressed.connect(_on_close_pressed)
 	load_more_button.pressed.connect(_request_next_page)
 	details_tab.pressed.connect(_show_tab.bind(false))
 	filters_tab.pressed.connect(_show_tab.bind(true))
-	preview_button.pressed.connect(_on_preview_pressed)
-	mapper_button.pressed.connect(_on_mapper_pressed)
-	download_button.pressed.connect(_on_download_pressed)
+	details.preview_pressed.connect(_on_preview_pressed)
+	details.mapper_pressed.connect(_on_mapper_pressed)
+	details.primary_pressed.connect(_on_primary_pressed)
 	(%ResetFilters as Button).pressed.connect(_on_reset_filters)
 	results.get_v_scroll_bar().value_changed.connect(_on_results_scrolled)
 	results.get_v_scroll_bar().changed.connect(_on_results_scrolled.bind(0.0))
@@ -160,30 +152,39 @@ func _ready() -> void:
 	filters.load_saved()
 	_sync_filter_controls()
 
+	# the first search starts when the tab is shown for the first time
+	visibility_changed.connect(_on_BeatSaverPanel_visibility_changed)
+
+	_update_query_controls()
+	_select(null)
+	_update_status()
+
+# called by the library once both panels are ready
+func setup(menu: MainMenu, kb: OQ_UI2DKeyboard) -> void:
+	main_menu_ref = menu
+	keyboard = kb
 	if keyboard != null:
+		if not keyboard.is_node_ready():
+			await keyboard.ready
 		keyboard.text_input_enter.connect(_text_input_enter)
 		keyboard.text_input_cancel.connect(_text_input_cancel)
-
-	var canvas := _get_canvas()
-	if canvas != null:
-		canvas.visibility_changed.connect(_on_BeatSaverPanel_visibility_changed)
-
 	if main_menu_ref != null:
 		main_menu_ref.song_list_changed.connect(on_song_list_changed)
 
-	_update_query_controls()
-	_update_details()
-	_update_status()
+# the shared keyboard is now used by someone else
+func cancel_keyboard() -> void:
+	_awaiting_keyboard = false
 
 func _process(_delta: float) -> void:
 	if not is_visible_in_tree(): return
 	if not _download_queue.is_empty():
 		_update_download_progress()
-	var playing := _is_preview_playing()
-	if playing != _preview_shown_playing:
+	var playing := _is_preview_playing() and _preview_map == _selected
+	if playing != _preview_shown_playing or _preview_shown_map != _selected:
 		_preview_shown_playing = playing
-		preview_button.text = "Stop" if playing else "Preview"
-		preview_button.icon = BeatSaverIcons.get_icon("stop" if playing else "play")
+		_preview_shown_map = _selected
+		details.set_preview_playing(playing)
+		_redraw()
 
 func _get_canvas() -> OQ_UI2DCanvas:
 	var n: Node = self
@@ -192,36 +193,14 @@ func _get_canvas() -> OQ_UI2DCanvas:
 		n = n.get_parent()
 	return null
 
-# override hide() method to handle case where UI is inside a OQ_UI2DCanvas
-func _hide() -> void:
-	var canvas := _get_canvas()
-	if canvas != null:
-		canvas.hide()
-	else:
-		visible = false
-
-# override show() method to handle case where UI is inside a OQ_UI2DCanvas
-func _show() -> void:
-	var canvas := _get_canvas()
-	if canvas != null:
-		canvas.show()
-	else:
-		visible = true
-	_on_BeatSaverPanel_visibility_changed()
-
 func _redraw() -> void:
 	var canvas := _get_canvas()
-	if canvas != null: canvas._input_update()
+	if canvas != null and canvas.is_node_ready(): canvas._input_update()
 
 func _on_BeatSaverPanel_visibility_changed() -> void:
-	if _is_first_show:
+	if _is_first_show and is_visible_in_tree():
 		_is_first_show = false
 		_start_search()
-
-func _on_close_pressed() -> void:
-	if _is_preview_playing() and _preview_map != null:
-		main_menu_ref._on_stop_prev_timeout()
-	_hide()
 
 # --- search ---------------------------------------------------------------
 
@@ -474,11 +453,15 @@ func _show_tab(show_filters: bool) -> void:
 	details_tab.set_pressed_no_signal(not show_filters)
 
 func _select(m: BeatSaverMap) -> void:
+	# selecting the selected map again plays it, if it is downloaded
+	if m != null and m == _selected and is_downloaded(m):
+		load_requested.emit(m.version_hash)
+		return
 	_selected = m
 	details_tab.disabled = m == null
 	if m == null:
+		details.show_empty("Select a map")
 		_show_tab(true)
-		_update_details()
 		return
 	_show_tab(false)
 	_update_details()
@@ -489,76 +472,10 @@ func _update_details() -> void:
 	var m := _selected
 	if m == null:
 		return
-	detail_title.text = m.title()
-	detail_artist.text = m.song_author_name if not m.song_author_name.is_empty() else "Unknown artist"
-	detail_mapper.text = "Mapped by %s" % m.level_author_name
-	if m.uploader_name != m.level_author_name and not m.uploader_name.is_empty():
-		detail_mapper.text += "  (uploaded by %s)" % m.uploader_name
-	detail_cover.texture = _cover_cache.get(m.cover_url, preload("res://game/data/beepsaber_logo.png"))
-	mapper_button.disabled = m.uploader_id < 0 or query.mapper_id == m.uploader_id
-	mapper_button.tooltip_text = "More maps by %s" % m.uploader_name
-
-	for c in detail_badges.get_children(): c.queue_free()
-	if m.ranked: detail_badges.add_child(BeatSaverMapRow.make_chip("Ranked", BeatSaverMapRow.BADGE_RANKED))
-	elif m.qualified: detail_badges.add_child(BeatSaverMapRow.make_chip("Qualified", BeatSaverMapRow.BADGE_RANKED, false))
-	if m.curated: detail_badges.add_child(BeatSaverMapRow.make_chip("Curated", BeatSaverMapRow.BADGE_CURATED))
-	if m.uploader_verified: detail_badges.add_child(BeatSaverMapRow.make_chip("Verified mapper", BeatSaverMapRow.BADGE_CURATED, false))
-	if m.automapper: detail_badges.add_child(BeatSaverMapRow.make_chip("Auto-mapped", BeatSaverMapRow.SUPPORTED_MOD, false))
-	if is_downloaded(m): detail_badges.add_child(BeatSaverMapRow.make_chip("Downloaded", BeatSaverMapRow.STATUS_DOWNLOADED))
-
-	for c in stats_grid.get_children(): c.queue_free()
-	var nps := "%.1f" % m.max_nps()
-	if m.max_nps() - m.min_nps() >= 0.1:
-		nps = "%.1f – %.1f" % [m.min_nps(), m.max_nps()]
-	var mods := m.mods()
-	var mods_text := "none"
-	if not mods.is_empty():
-		var parts: Array[String] = []
-		for mod in mods:
-			parts.append(BeatSaverMapRow.short_mod_name(mod) + ("" if BeatSaverMap.is_mod_supported(mod) else " (unsupported)"))
-		mods_text = ", ".join(parts)
-	var stats := [
-		["Length", BeatSaverMap.format_duration(m.duration)], ["BPM", BeatSaverMapRow._format_bpm(m.bpm)],
-		["Rating", "%d%%" % roundi(m.score * 100.0)], ["Votes", "%s up  ·  %s down" % [_format_thousands(m.upvotes), _format_thousands(m.downvotes)]],
-		["NPS", nps], ["Uploaded", m.upload_date()],
-		["Key", m.id], ["Mods", mods_text],
-	]
-	for s: Array in stats:
-		var k := Label.new()
-		k.text = s[0]
-		k.theme_type_variation = &"MutedLabel"
-		k.add_theme_font_size_override("font_size", 24)
-		var v := Label.new()
-		v.text = s[1]
-		v.add_theme_font_size_override("font_size", 24)
-		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		v.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		v.custom_minimum_size.x = 60
-		if s[0] == "Rating":
-			v.add_theme_color_override("font_color", BeatSaverMap.rating_color(m.score))
-		if s[0] == "Mods" and not mods.is_empty():
-			v.tooltip_text = mods_text
-			if m.needs_unsupported_mod():
-				v.add_theme_color_override("font_color", BeatSaverMapRow.UNSUPPORTED)
-		stats_grid.add_child(k)
-		stats_grid.add_child(v)
-
-	var lines: Array[String] = []
-	var by_char := m.diffs_by_characteristic()
-	for ch: String in by_char:
-		var entries: Array[String] = []
-		for d: BeatSaverMap.Diff in by_char[ch]:
-			var col := (BeatSaverMap.DIFFICULTY_COLORS.get(d.difficulty, Color.WHITE) as Color).lightened(0.2)
-			var extra := ""
-			if d.ne or d.vivify:
-				extra = " [color=#ff5468](%s)[/color]" % ("Vivify" if d.vivify else "Noodle")
-			entries.append("[color=#%s]%s[/color] [color=#8c95a8]%.1f[/color]%s" % [
-				col.to_html(false), BeatSaverMap.DIFFICULTY_NAMES.get(d.difficulty, d.difficulty), d.nps, extra])
-		lines.append("[color=#8c95a8]%s:[/color]  %s" % [BeatSaverMap.CHARACTERISTIC_NAMES.get(ch, ch), "   ".join(entries)])
-	diffs_label.text = "\n".join(lines)
-	description.text = m.description if not m.description.strip_edges().is_empty() else "No description."
-	description.scroll_to_line(0)
+	details.show_online(m, is_downloaded(m), m.uploader_id >= 0 and query.mapper_id != m.uploader_id)
+	details.set_cover(_cover_cache.get(m.cover_url) as Texture2D)
 	_update_download_controls()
+	_redraw()
 
 # --- downloads ---------------------------------------------------------------
 
@@ -573,22 +490,13 @@ func _update_download_controls() -> void:
 	if m == null: return
 	var idx := _download_queue.find(m)
 	if is_downloaded(m):
-		download_button.text = "Downloaded"
-		download_button.icon = BeatSaverIcons.get_icon("check")
-		download_button.disabled = true
+		details.set_primary("Load", "play", false)
 	elif idx >= 0:
 		# while downloading the button shows the progress (see _update_download_progress)
-		download_button.text = "0%" if idx == 0 else "Queued"
-		download_button.icon = BeatSaverIcons.get_icon("download")
-		download_button.disabled = true
+		details.set_primary("0%" if idx == 0 else "Queued", "download", true)
 	else:
-		download_button.text = "Download"
-		download_button.icon = BeatSaverIcons.get_icon("download")
-		download_button.disabled = m.download_url.is_empty()
-	download_status.visible = idx >= 0
-	if idx > 0:
-		download_progress.value = 0.0
-		download_label.text = "queued"
+		details.set_primary("Download", "download", m.download_url.is_empty())
+	details.set_progress(idx >= 0, 0.0, "queued" if idx > 0 else "0%")
 
 func _update_download_progress() -> void:
 	var total := download_request.get_body_size()
@@ -599,9 +507,15 @@ func _update_download_progress() -> void:
 	var row := _row_for(current)
 	if row != null: row.set_status(text, false)
 	if _selected == current:
-		download_progress.value = frac
-		download_label.text = text
-		download_button.text = text
+		details.set_progress(true, frac, text)
+		details.set_primary(text, "download", true)
+
+func _on_primary_pressed() -> void:
+	if _selected == null: return
+	if is_downloaded(_selected):
+		load_requested.emit(_selected.version_hash)
+	else:
+		_on_download_pressed()
 
 func _on_download_pressed() -> void:
 	if _selected == null or is_downloaded(_selected) or _download_queue.has(_selected): return
@@ -696,12 +610,12 @@ func on_song_list_changed() -> void:
 # --- preview ------------------------------------------------------------------
 
 func _is_preview_playing() -> bool:
-	return main_menu_ref != null and main_menu_ref.song_preview.playing and _preview_map != null
+	return main_menu_ref != null and _preview_map != null and main_menu_ref.is_previewing(_preview_map.version_hash)
 
 func _on_preview_pressed() -> void:
-	if _is_preview_playing():
+	if _is_preview_playing() and _preview_map == _selected:
 		preview_request.cancel_request()
-		main_menu_ref._on_stop_prev_timeout()
+		main_menu_ref.stop_preview()
 		_preview_map = null
 	elif _selected != null:
 		_play_preview(_selected)
@@ -713,9 +627,9 @@ func _play_preview(m: BeatSaverMap) -> void:
 	preview_request.request(m.preview_url, HTTP_HEADERS)
 
 func _on_preview_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
-	if result == HTTPRequest.RESULT_SUCCESS and response_code == 200 and main_menu_ref != null:
+	if result == HTTPRequest.RESULT_SUCCESS and response_code == 200 and main_menu_ref != null and _preview_map != null:
 		# BeatSaver has all its previews in mp3 format
-		main_menu_ref.play_preview(body, 0, -1, "mp3")
+		main_menu_ref.play_preview(body, 0, -1, "mp3", _preview_map.version_hash)
 
 # --- covers ---------------------------------------------------------------------
 
@@ -752,7 +666,7 @@ func _apply_cover(url: String) -> void:
 	for row in _rows:
 		if row.map.cover_url == url: row.set_cover(tex)
 	if _selected != null and _selected.cover_url == url:
-		detail_cover.texture = tex
+		details.set_cover(tex)
 
 # --- filters ----------------------------------------------------------------------
 

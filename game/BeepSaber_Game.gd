@@ -44,6 +44,9 @@ var current_health := Constants.HEALTH_START
 @onready var point_label := $Point_Label as MeshInstance3D
 @onready var percent_indicator := $Percent_Indicator as PercentIndicator
 
+@onready var library_canvas := $Library_Canvas as OQ_UI2DCanvas
+@onready var library := library_canvas.ui_control as LibraryPanel
+# other online map sources (Beat Sage / YouTube), opened from the library
 @onready var map_source_dialogs := $MapSourceDialogs as Node3D
 @onready var online_search_keyboard := $Keyboard_online_search as OQ_UI2DKeyboard
 
@@ -183,15 +186,22 @@ func _transition_game_state(next_state: GameState) -> void:
 	gamestate = next_state
 	gamestate._ready(self)
 
-func show_MapSourceDialogs(showing: bool = true) -> void:
-	map_source_dialogs.visible = showing
-	for c in map_source_dialogs.get_children():
-		if c is OQ_UI2DCanvas:
-			(c as OQ_UI2DCanvas)._hide()
+# shows / hides the song library (left of the player); hiding also closes the
+# dialogs of the other map sources that can be opened from the library
+func show_library(showing: bool = true) -> void:
 	if showing:
-		var first_dialog := map_source_dialogs.get_child(0)
-		if first_dialog is OQ_UI2DCanvas:
-			(first_dialog as OQ_UI2DCanvas)._show()
+		library_canvas._show()
+	else:
+		library_canvas._hide()
+	map_source_dialogs.visible = showing
+	if not showing:
+		for c in map_source_dialogs.get_children():
+			if c is OQ_UI2DCanvas:
+				(c as OQ_UI2DCanvas)._hide()
+
+# old name, still used by some game states
+func show_MapSourceDialogs(showing: bool = true) -> void:
+	show_library(showing)
 
 # call this method to submit a new highscore to the database
 func _submit_highscore(player_name: String) -> void:

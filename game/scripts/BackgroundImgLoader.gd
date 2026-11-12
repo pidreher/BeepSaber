@@ -58,11 +58,12 @@ func _load_img_threaded(req: ImgLoadRequest) -> void:
 		
 		# perform callback in the form of my_callback(texture, filepath, ...)
 		req.callback_func.bind(tex, req.is_main_cover, req.index).call()
-		
-		# decrement count to show that this thread is done and another can start
-		_img_load_mutex.lock()
-		_running_img_load_threads -= 1
-		_img_load_mutex.unlock()
+
+	# decrement count to show that this thread is done and another can start
+	# (also when the file could not be read, else loading stalls for good)
+	_img_load_mutex.lock()
+	_running_img_load_threads -= 1
+	_img_load_mutex.unlock()
 	
 	# start next load if there are any waiting
 	_start_next_img_load()
