@@ -35,6 +35,8 @@ func _ready() -> void:
 		v_scroll = (scroll_node as ItemList).get_v_scroll_bar()
 	elif scroll_node is ScrollContainer:
 		v_scroll = (scroll_node as ScrollContainer).get_v_scroll_bar()
+	elif scroll_node is RichTextLabel:
+		v_scroll = (scroll_node as RichTextLabel).get_v_scroll_bar()
 	
 	@warning_ignore("return_value_discarded")
 	scroll_node.connect(&"mouse_entered", Callable(self, &"_mouse_entered"))
