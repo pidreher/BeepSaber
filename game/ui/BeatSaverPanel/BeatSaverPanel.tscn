@@ -1,105 +1,23 @@
-[gd_scene load_steps=15 format=3 uid="uid://383dbnh6gxd3"]
+[gd_scene format=3 uid="uid://383dbnh6gxd3"]
 
-[ext_resource type="FontFile" uid="uid://01k27lk2a4bw" path="res://OQ_Toolkit/OQ_UI2D/theme/RobotoMono-Medium.ttf" id="1"]
+[ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1_s34gr"]
 [ext_resource type="Script" path="res://game/ui/BeatSaverPanel/BeatSaverPanel.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://dtipmx5ep1dkk" path="res://game/vr_slider.tscn" id="3"]
-[ext_resource type="Texture2D" uid="uid://cviyxvrpvyr0g" path="res://game/data/beepsaber_logo.png" id="5"]
-[ext_resource type="Theme" uid="uid://cbutfawaljce6" path="res://game/BlackWhiteThem.tres" id="6"]
+[ext_resource type="PackedScene" path="res://game/vr_slider.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://game/data/beepsaber_logo.png" id="5"]
 
-[sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(0, 0, 0, 1)
-border_width_left = 8
-border_width_top = 8
-border_width_right = 8
-border_width_bottom = 8
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="FontFile" id="2"]
-fallbacks = Array[Font]([ExtResource("1")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-
-[sub_resource type="Theme" id="3"]
-default_font = SubResource("2")
-
-[sub_resource type="StyleBoxFlat" id="6"]
-bg_color = Color(0.270588, 0.270588, 0.270588, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="5"]
-bg_color = Color(0.14902, 0.14902, 0.14902, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="7"]
-bg_color = Color(0, 0, 0, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="FontFile" id="8"]
-fallbacks = Array[Font]([ExtResource("1")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-
-[sub_resource type="FontFile" id="9"]
-fallbacks = Array[Font]([ExtResource("1")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/glyphs/0/advance = Vector2(0, 0)
-cache/0/16/0/glyphs/0/offset = Vector2(0, 0)
-cache/0/16/0/glyphs/0/size = Vector2(0, 0)
-cache/0/16/0/glyphs/0/uv_rect = Rect2(0, 0, 0, 0)
-cache/0/16/0/glyphs/0/texture_idx = -1
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-
-[sub_resource type="Theme" id="10"]
-default_font = SubResource("9")
-
-[node name="BeatSaverPanel" type="Panel"]
+[node name="BeatSaverPanel" type="Panel" unique_id=797576933]
 offset_right = 1536.0
 offset_bottom = 960.0
-theme = ExtResource("6")
-theme_override_styles/panel = SubResource("1")
+theme = ExtResource("1_s34gr")
 script = ExtResource("2")
 
-[node name="ItemList" type="ItemList" parent="."]
+[node name="ItemList" type="ItemList" parent="." unique_id=550441038]
 layout_mode = 0
 anchor_bottom = 1.0
 offset_left = 16.0
 offset_top = 80.0
 offset_right = 880.0
 offset_bottom = -112.0
-theme = SubResource("3")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 item_count = 3
 fixed_icon_size = Vector2i(80, 80)
@@ -110,20 +28,16 @@ item_1/icon = ExtResource("5")
 item_2/text = "Ítem 2"
 item_2/icon = ExtResource("5")
 
-[node name="mode" type="Button" parent="."]
+[node name="mode" type="Button" parent="." unique_id=2112973335]
 layout_mode = 0
 offset_left = 331.875
 offset_top = 16.0
 offset_right = 563.875
 offset_bottom = 72.0
-theme_override_styles/disabled = SubResource("6")
-theme_override_styles/hover = SubResource("5")
-theme_override_styles/pressed = SubResource("6")
-theme_override_styles/normal = SubResource("7")
 text = "Plays"
 clip_text = true
 
-[node name="download" type="Button" parent="."]
+[node name="download" type="Button" parent="." unique_id=547842059]
 layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -131,12 +45,9 @@ offset_left = 344.0
 offset_top = -88.0
 offset_right = 552.0
 offset_bottom = -24.0
-theme_override_styles/hover = SubResource("5")
-theme_override_styles/pressed = SubResource("6")
-theme_override_styles/normal = SubResource("7")
 text = "Download"
 
-[node name="search" type="Button" parent="."]
+[node name="search" type="Button" parent="." unique_id=1928984079]
 layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -144,12 +55,9 @@ offset_left = 624.0
 offset_top = -88.0
 offset_right = 832.0
 offset_bottom = -24.0
-theme_override_styles/hover = SubResource("5")
-theme_override_styles/pressed = SubResource("6")
-theme_override_styles/normal = SubResource("7")
 text = "Search"
 
-[node name="back" type="Button" parent="."]
+[node name="back" type="Button" parent="." unique_id=122573572]
 layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -157,12 +65,9 @@ offset_left = 16.0
 offset_top = -944.0
 offset_right = 224.0
 offset_bottom = -880.0
-theme_override_styles/hover = SubResource("5")
-theme_override_styles/pressed = SubResource("6")
-theme_override_styles/normal = SubResource("7")
 text = "Back"
 
-[node name="gotoMapsBy" type="Button" parent="."]
+[node name="gotoMapsBy" type="Button" parent="." unique_id=245690620]
 layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -170,12 +75,9 @@ offset_left = 904.0
 offset_top = -88.0
 offset_right = 1112.0
 offset_bottom = -24.0
-theme_override_styles/hover = SubResource("5")
-theme_override_styles/pressed = SubResource("6")
-theme_override_styles/normal = SubResource("7")
 text = "Maps By XYZ"
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=1289215043]
 layout_mode = 0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -184,9 +86,8 @@ offset_left = 16.0
 offset_top = -104.0
 offset_right = -1200.0
 offset_bottom = -16.0
-theme_override_fonts/font = SubResource("8")
 
-[node name="source" type="Label" parent="."]
+[node name="source" type="Label" parent="." unique_id=1671832370]
 layout_mode = 0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -195,10 +96,9 @@ offset_left = 654.0
 offset_top = -145.0
 offset_right = -23.0
 offset_bottom = -118.0
-theme_override_fonts/font = SubResource("8")
 text = "From beatsaver.com"
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1601335576]
 layout_mode = 0
 offset_left = 904.0
 offset_top = 32.0
@@ -208,7 +108,7 @@ texture = ExtResource("5")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="song_data" type="RichTextLabel" parent="."]
+[node name="song_data" type="RichTextLabel" parent="." unique_id=838742172]
 layout_mode = 0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -217,13 +117,12 @@ offset_left = 904.0
 offset_top = -672.0
 offset_right = -32.0
 offset_bottom = -120.0
-theme = SubResource("10")
 bbcode_enabled = true
 text = "Select a song to see the details
 
 press Download to add the selected song to your local playlist"
 
-[node name="CloseButton" type="Button" parent="."]
+[node name="CloseButton" type="Button" parent="." unique_id=1095333874]
 layout_mode = 0
 offset_left = 1312.0
 offset_top = 872.0
@@ -231,16 +130,16 @@ offset_right = 1520.0
 offset_bottom = 936.0
 text = "Close"
 
-[node name="list_slider" parent="." instance=ExtResource("3")]
+[node name="list_slider" parent="." unique_id=305014088 instance=ExtResource("3")]
 scroll_node_path = NodePath("../ItemList")
 
-[node name="HTTPReq" type="HTTPRequest" parent="."]
+[node name="HTTPReq" type="HTTPRequest" parent="." unique_id=193984740]
 
-[node name="HTTPDownload" type="HTTPRequest" parent="."]
+[node name="HTTPDownload" type="HTTPRequest" parent="." unique_id=1586899556]
 
-[node name="CoverDownload" type="HTTPRequest" parent="."]
+[node name="CoverDownload" type="HTTPRequest" parent="." unique_id=179021608]
 
-[node name="PreviewDownload" type="HTTPRequest" parent="."]
+[node name="PreviewDownload" type="HTTPRequest" parent="." unique_id=265734392]
 
 [connection signal="item_selected" from="ItemList" to="." method="_on_ItemList_item_selected"]
 [connection signal="button_up" from="mode" to="." method="_on_mode_button_up"]

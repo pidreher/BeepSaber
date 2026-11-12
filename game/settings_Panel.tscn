@@ -1,293 +1,62 @@
-[gd_scene load_steps=15 format=3 uid="uid://biylg2wsontn3"]
+[gd_scene format=3 uid="uid://biylg2wsontn3"]
 
-[ext_resource type="FontFile" uid="uid://01k27lk2a4bw" path="res://OQ_Toolkit/OQ_UI2D/theme/RobotoMono-Medium.ttf" id="1"]
-[ext_resource type="Script" uid="uid://cpwy2bk3ecxqb" path="res://game/settings_Panel.gd" id="2"]
-[ext_resource type="FontFile" uid="uid://cdsnr8tscm8y6" path="res://OQ_Toolkit/OQ_UI2D/theme/Roboto-Medium.ttf" id="3"]
-[ext_resource type="PackedScene" uid="uid://dtipmx5ep1dkk" path="res://game/vr_slider.tscn" id="4"]
+[ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1_162yr"]
+[ext_resource type="Script" path="res://game/settings_Panel.gd" id="2"]
+[ext_resource type="PackedScene" path="res://game/vr_slider.tscn" id="4"]
 
-[sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(0, 0, 0, 1)
-border_width_left = 8
-border_width_top = 8
-border_width_right = 8
-border_width_bottom = 8
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="FontFile" id="2"]
-fallbacks = Array[Font]([ExtResource("1")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/2/0/ascent = 0.0
-cache/0/2/0/descent = 0.0
-cache/0/2/0/underline_position = 0.0
-cache/0/2/0/underline_thickness = 0.0
-cache/0/2/0/scale = 1.0
-cache/0/2/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/2/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/3/0/ascent = 0.0
-cache/0/3/0/descent = 0.0
-cache/0/3/0/underline_position = 0.0
-cache/0/3/0/underline_thickness = 0.0
-cache/0/3/0/scale = 1.0
-cache/0/3/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/3/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/4/0/ascent = 0.0
-cache/0/4/0/descent = 0.0
-cache/0/4/0/underline_position = 0.0
-cache/0/4/0/underline_thickness = 0.0
-cache/0/4/0/scale = 1.0
-cache/0/4/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/4/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/5/0/ascent = 0.0
-cache/0/5/0/descent = 0.0
-cache/0/5/0/underline_position = 0.0
-cache/0/5/0/underline_thickness = 0.0
-cache/0/5/0/scale = 1.0
-cache/0/5/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/5/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/6/0/ascent = 0.0
-cache/0/6/0/descent = 0.0
-cache/0/6/0/underline_position = 0.0
-cache/0/6/0/underline_thickness = 0.0
-cache/0/6/0/scale = 1.0
-cache/0/6/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/6/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/7/0/ascent = 0.0
-cache/0/7/0/descent = 0.0
-cache/0/7/0/underline_position = 0.0
-cache/0/7/0/underline_thickness = 0.0
-cache/0/7/0/scale = 1.0
-cache/0/7/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/7/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/8/0/ascent = 0.0
-cache/0/8/0/descent = 0.0
-cache/0/8/0/underline_position = 0.0
-cache/0/8/0/underline_thickness = 0.0
-cache/0/8/0/scale = 1.0
-cache/0/8/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/8/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/9/0/ascent = 0.0
-cache/0/9/0/descent = 0.0
-cache/0/9/0/underline_position = 0.0
-cache/0/9/0/underline_thickness = 0.0
-cache/0/9/0/scale = 1.0
-cache/0/9/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/9/0/kerning_overrides/10/0 = Vector2(0, 0)
-cache/0/10/0/ascent = 0.0
-cache/0/10/0/descent = 0.0
-cache/0/10/0/underline_position = 0.0
-cache/0/10/0/underline_thickness = 0.0
-cache/0/10/0/scale = 1.0
-cache/0/10/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/2/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/3/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/4/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/5/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/6/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/7/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/8/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/9/0 = Vector2(0, 0)
-cache/0/10/0/kerning_overrides/10/0 = Vector2(0, 0)
-
-[sub_resource type="Theme" id="3"]
-default_font = SubResource("2")
-
-[sub_resource type="FontFile" id="4"]
-fallbacks = Array[Font]([ExtResource("3")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-
-[sub_resource type="Theme" id="5"]
-default_font = SubResource("4")
-
-[sub_resource type="FontFile" id="6"]
-fallbacks = Array[Font]([ExtResource("3")])
-subpixel_positioning = 0
-msdf_pixel_range = 14
-msdf_size = 128
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-
-[sub_resource type="Theme" id="7"]
-default_font = SubResource("6")
-
-[sub_resource type="StyleBoxFlat" id="10"]
-bg_color = Color(0, 0, 0, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="9"]
-bg_color = Color(0.270588, 0.270588, 0.270588, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="8"]
-bg_color = Color(0.14902, 0.14902, 0.14902, 1)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 1, 1, 1)
-
-[node name="settings_Panel" type="Panel"]
-offset_right = 896.0
-offset_bottom = 656.0
+[node name="settings_Panel" type="Panel" unique_id=1434097560]
+offset_right = 1280.0
+offset_bottom = 900.0
 mouse_filter = 1
-theme_override_styles/panel = SubResource("1")
+theme = ExtResource("1_162yr")
 script = ExtResource("2")
 
-[node name="settings" type="Label" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -432.0
-offset_top = -272.0
-offset_right = 429.0
-offset_bottom = -249.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = SubResource("3")
-text = "Settings
-"
-
-[node name="note" type="Label" parent="."]
+[node name="settings" type="Label" parent="." unique_id=592933858]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 36.0
-offset_right = 859.0
-offset_bottom = 50.0
-theme = SubResource("3")
-theme_override_font_sizes/font_size = 10
-text = "    (*) Has performance impact (hover options for info)    "
+offset_left = 44.0
+offset_top = 28.0
+offset_right = 640.0
+offset_bottom = 84.0
+theme_type_variation = &"HeaderLabel"
+text = "Settings"
+
+[node name="note" type="Label" parent="." unique_id=655190522]
+layout_mode = 0
+offset_left = 640.0
+offset_top = 40.0
+offset_right = 1236.0
+offset_bottom = 80.0
+theme_type_variation = &"MutedLabel"
+text = "* = performance impact (hover for info)"
 horizontal_alignment = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=953526175]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 54.0
-offset_right = 867.0
-offset_bottom = 561.0
+offset_left = 44.0
+offset_top = 104.0
+offset_right = 1252.0
+offset_bottom = 784.0
+horizontal_scroll_mode = 0
 
-[node name="VBox" type="VBoxContainer" parent="ScrollContainer"]
+[node name="VBox" type="VBoxContainer" parent="ScrollContainer" unique_id=120967503]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 14
 
-[node name="audio" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="audio" type="HBoxContainer" parent="ScrollContainer/VBox" unique_id=1923915282]
 layout_mode = 2
 theme_override_constants/separation = 22
 
-[node name="master" type="VBoxContainer" parent="ScrollContainer/VBox/audio"]
+[node name="master" type="VBoxContainer" parent="ScrollContainer/VBox/audio" unique_id=1965555640]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="master_label" type="Label" parent="ScrollContainer/VBox/audio/master"]
+[node name="master_label" type="Label" parent="ScrollContainer/VBox/audio/master" unique_id=1549836199]
 layout_mode = 2
-theme = SubResource("3")
 text = "Master"
 
-[node name="master_slider" type="HSlider" parent="ScrollContainer/VBox/audio/master"]
+[node name="master_slider" type="HSlider" parent="ScrollContainer/VBox/audio/master" unique_id=1676325196]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -297,16 +66,15 @@ value = 0.8
 tick_count = 2
 ticks_on_borders = true
 
-[node name="sfx" type="VBoxContainer" parent="ScrollContainer/VBox/audio"]
+[node name="sfx" type="VBoxContainer" parent="ScrollContainer/VBox/audio" unique_id=641244014]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="sfx_label" type="Label" parent="ScrollContainer/VBox/audio/sfx"]
+[node name="sfx_label" type="Label" parent="ScrollContainer/VBox/audio/sfx" unique_id=1616637809]
 layout_mode = 2
-theme = SubResource("3")
 text = "SFX"
 
-[node name="sfx_slider" type="HSlider" parent="ScrollContainer/VBox/audio/sfx"]
+[node name="sfx_slider" type="HSlider" parent="ScrollContainer/VBox/audio/sfx" unique_id=210404573]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -316,16 +84,15 @@ value = 0.8
 tick_count = 2
 ticks_on_borders = true
 
-[node name="music" type="VBoxContainer" parent="ScrollContainer/VBox/audio"]
+[node name="music" type="VBoxContainer" parent="ScrollContainer/VBox/audio" unique_id=1749070054]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="music_label" type="Label" parent="ScrollContainer/VBox/audio/music"]
+[node name="music_label" type="Label" parent="ScrollContainer/VBox/audio/music" unique_id=82351186]
 layout_mode = 2
-theme = SubResource("3")
 text = "Music"
 
-[node name="music_slider" type="HSlider" parent="ScrollContainer/VBox/audio/music"]
+[node name="music_slider" type="HSlider" parent="ScrollContainer/VBox/audio/music" unique_id=163215215]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -335,16 +102,15 @@ value = 0.8
 tick_count = 2
 ticks_on_borders = true
 
-[node name="music_preview" type="VBoxContainer" parent="ScrollContainer/VBox/audio"]
+[node name="music_preview" type="VBoxContainer" parent="ScrollContainer/VBox/audio" unique_id=816927780]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="music_preview_label" type="Label" parent="ScrollContainer/VBox/audio/music_preview"]
+[node name="music_preview_label" type="Label" parent="ScrollContainer/VBox/audio/music_preview" unique_id=1647871017]
 layout_mode = 2
-theme = SubResource("3")
 text = "Music Preview"
 
-[node name="music_preview_slider" type="HSlider" parent="ScrollContainer/VBox/audio/music_preview"]
+[node name="music_preview_slider" type="HSlider" parent="ScrollContainer/VBox/audio/music_preview" unique_id=451458492]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -354,74 +120,67 @@ value = 0.8
 tick_count = 2
 ticks_on_borders = true
 
-[node name="recenter" type="Button" parent="ScrollContainer/VBox"]
+[node name="recenter" type="Button" parent="ScrollContainer/VBox" unique_id=27655442]
 layout_mode = 2
 text = "Recenter"
 
-[node name="cut_blocks" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="cut_blocks" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1831401964]
 layout_mode = 2
 tooltip_text = "High Performance impact*"
-theme = SubResource("3")
 text = "*Cut Blocks: "
 
-[node name="glare" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="glare" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1064789801]
 layout_mode = 2
 tooltip_text = "Medium Performance impact*"
-theme = SubResource("3")
 text = "*Glow: "
 
-[node name="saber_tail" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="saber_tail" type="CheckButton" parent="ScrollContainer/VBox" unique_id=179132123]
 layout_mode = 2
 tooltip_text = "High Performance impact*"
-theme = SubResource("3")
 text = "*Saber Tail: "
 
-[node name="background_mode_grid" type="GridContainer" parent="ScrollContainer/VBox"]
+[node name="background_mode_grid" type="GridContainer" parent="ScrollContainer/VBox" unique_id=1570370258]
 layout_mode = 2
 columns = 2
 
-[node name="Label" type="Label" parent="ScrollContainer/VBox/background_mode_grid"]
+[node name="Label" type="Label" parent="ScrollContainer/VBox/background_mode_grid" unique_id=1251328491]
 layout_mode = 2
 text = "Background Mode:"
 
-[node name="background_mode" type="OptionButton" parent="ScrollContainer/VBox/background_mode_grid"]
+[node name="background_mode" type="OptionButton" parent="ScrollContainer/VBox/background_mode_grid" unique_id=2109181567]
 layout_mode = 2
 
-[node name="background_texture_grid" type="GridContainer" parent="ScrollContainer/VBox"]
+[node name="background_texture_grid" type="GridContainer" parent="ScrollContainer/VBox" unique_id=30073752]
 layout_mode = 2
 columns = 2
 
-[node name="Label" type="Label" parent="ScrollContainer/VBox/background_texture_grid"]
+[node name="Label" type="Label" parent="ScrollContainer/VBox/background_texture_grid" unique_id=249854333]
 layout_mode = 2
 text = "Background Image:"
 
-[node name="background_texture" type="OptionButton" parent="ScrollContainer/VBox/background_texture_grid"]
+[node name="background_texture" type="OptionButton" parent="ScrollContainer/VBox/background_texture_grid" unique_id=1143296245]
 layout_mode = 2
 
-[node name="mixed_reality" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="mixed_reality" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1084573606]
 layout_mode = 2
-theme = SubResource("3")
 text = "Mixed Reality:"
 
-[node name="explain" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="explain" type="CheckButton" parent="ScrollContainer/VBox" unique_id=112623034]
 layout_mode = 2
-theme = SubResource("3")
 text = "Explain Scores:"
 
-[node name="left_handed" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="left_handed" type="CheckButton" parent="ScrollContainer/VBox" unique_id=208631209]
 layout_mode = 2
-theme = SubResource("3")
 text = "Left-Handed"
 
-[node name="SaberThicknessRow" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="SaberThicknessRow" type="HBoxContainer" parent="ScrollContainer/VBox" unique_id=1190327168]
 layout_mode = 2
 
-[node name="saber_thickness_label" type="Label" parent="ScrollContainer/VBox/SaberThicknessRow"]
+[node name="saber_thickness_label" type="Label" parent="ScrollContainer/VBox/SaberThicknessRow" unique_id=204485886]
 layout_mode = 2
-theme = SubResource("3")
 text = "Saber Thickness: "
 
-[node name="saber_thickness" type="HSlider" parent="ScrollContainer/VBox/SaberThicknessRow"]
+[node name="saber_thickness" type="HSlider" parent="ScrollContainer/VBox/SaberThicknessRow" unique_id=1605216808]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -430,30 +189,26 @@ max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="SaberTypeRow" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="SaberTypeRow" type="HBoxContainer" parent="ScrollContainer/VBox" unique_id=2023904025]
 layout_mode = 2
 
-[node name="saber_type_label" type="Label" parent="ScrollContainer/VBox/SaberTypeRow"]
+[node name="saber_type_label" type="Label" parent="ScrollContainer/VBox/SaberTypeRow" unique_id=800029982]
 layout_mode = 2
-theme = SubResource("3")
 text = "Saber Type:"
 
-[node name="saber" type="OptionButton" parent="ScrollContainer/VBox/SaberTypeRow"]
+[node name="saber" type="OptionButton" parent="ScrollContainer/VBox/SaberTypeRow" unique_id=1694586091]
 layout_mode = 2
 size_flags_horizontal = 3
-theme = SubResource("5")
-theme_override_fonts/font = SubResource("4")
 flat = true
 
-[node name="SaberColorsRow" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="SaberColorsRow" type="HBoxContainer" parent="ScrollContainer/VBox" unique_id=1842844257]
 layout_mode = 2
 
-[node name="left_saber_col_label" type="Label" parent="ScrollContainer/VBox/SaberColorsRow"]
+[node name="left_saber_col_label" type="Label" parent="ScrollContainer/VBox/SaberColorsRow" unique_id=1352122352]
 layout_mode = 2
-theme = SubResource("3")
 text = "Saber Colors: "
 
-[node name="left_saber_col" type="ColorPickerButton" parent="ScrollContainer/VBox/SaberColorsRow"]
+[node name="left_saber_col" type="ColorPickerButton" parent="ScrollContainer/VBox/SaberColorsRow" unique_id=32204241]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Left saber"
@@ -461,7 +216,7 @@ flat = true
 color = Color(0.101961, 0.101961, 1, 1)
 edit_alpha = false
 
-[node name="right_saber_col" type="ColorPickerButton" parent="ScrollContainer/VBox/SaberColorsRow"]
+[node name="right_saber_col" type="ColorPickerButton" parent="ScrollContainer/VBox/SaberColorsRow" unique_id=113201702]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Right saber"
@@ -469,219 +224,205 @@ flat = true
 color = Color(1, 0.101961, 0.101961, 1)
 edit_alpha = false
 
-[node name="UI_VolumeRow" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="UI_VolumeRow" type="HBoxContainer" parent="ScrollContainer/VBox" unique_id=1926144776]
 layout_mode = 2
 
-[node name="ui_volume_label" type="Label" parent="ScrollContainer/VBox/UI_VolumeRow"]
+[node name="ui_volume_label" type="Label" parent="ScrollContainer/VBox/UI_VolumeRow" unique_id=1915348278]
 layout_mode = 2
-theme = SubResource("3")
 text = "UI Volume:"
 
-[node name="ui_volume_slider" type="HSlider" parent="ScrollContainer/VBox/UI_VolumeRow"]
+[node name="ui_volume_slider" type="HSlider" parent="ScrollContainer/VBox/UI_VolumeRow" unique_id=390944967]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 max_value = 10.0
 value = 10.0
 
-[node name="left_saber_offset" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="left_saber_offset" type="HFlowContainer" parent="ScrollContainer/VBox" unique_id=1991659469]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="Label" type="Label" parent="ScrollContainer/VBox/left_saber_offset" unique_id=149958803]
 layout_mode = 2
 text = "Left Saber Offset:"
 
-[node name="Control" type="Control" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="Control" type="Control" parent="ScrollContainer/VBox/left_saber_offset" unique_id=1806424010]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="poslabel" type="Label" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="poslabel" type="Label" parent="ScrollContainer/VBox/left_saber_offset" unique_id=742554252]
 layout_mode = 2
 text = "Position:"
 
-[node name="posx" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="posx" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset" unique_id=2095111428]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.001
 
-[node name="posy" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="posy" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset" unique_id=191750444]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.001
 
-[node name="posz" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="posz" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset" unique_id=846216490]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.001
 
-[node name="Control2" type="Control" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="Control2" type="Control" parent="ScrollContainer/VBox/left_saber_offset" unique_id=989845190]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="rotlabel" type="Label" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="rotlabel" type="Label" parent="ScrollContainer/VBox/left_saber_offset" unique_id=1164274058]
 layout_mode = 2
 text = "Rotation:"
 
-[node name="rotx" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="rotx" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset" unique_id=311922382]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 step = 0.5
 
-[node name="roty" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="roty" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset" unique_id=77431308]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 step = 0.5
 
-[node name="rotz" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset"]
+[node name="rotz" type="SpinBox" parent="ScrollContainer/VBox/left_saber_offset" unique_id=1151849657]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 step = 0.5
 
-[node name="right_saber_offset" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="right_saber_offset" type="HFlowContainer" parent="ScrollContainer/VBox" unique_id=2011668850]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="Label" type="Label" parent="ScrollContainer/VBox/right_saber_offset" unique_id=1508354265]
 layout_mode = 2
 text = "Right Saber Offset:"
 
-[node name="Control" type="Control" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="Control" type="Control" parent="ScrollContainer/VBox/right_saber_offset" unique_id=732643352]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="poslabel" type="Label" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="poslabel" type="Label" parent="ScrollContainer/VBox/right_saber_offset" unique_id=683367902]
 layout_mode = 2
 text = "Position:"
 
-[node name="posx" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="posx" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset" unique_id=70240782]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.001
 
-[node name="posy" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="posy" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset" unique_id=2057389833]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.001
 
-[node name="posz" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="posz" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset" unique_id=1522634357]
 layout_mode = 2
 min_value = -1.0
 max_value = 1.0
 step = 0.001
 
-[node name="Control2" type="Control" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="Control2" type="Control" parent="ScrollContainer/VBox/right_saber_offset" unique_id=1071809704]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="rotlabel" type="Label" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="rotlabel" type="Label" parent="ScrollContainer/VBox/right_saber_offset" unique_id=935759623]
 layout_mode = 2
 text = "Rotation:"
 
-[node name="rotx" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="rotx" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset" unique_id=1586328030]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 step = 0.5
 
-[node name="roty" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="roty" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset" unique_id=666173603]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 step = 0.5
 
-[node name="rotz" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset"]
+[node name="rotz" type="SpinBox" parent="ScrollContainer/VBox/right_saber_offset" unique_id=945384846]
 layout_mode = 2
 min_value = -180.0
 max_value = 180.0
 step = 0.5
 
-[node name="player_height_offset" type="HBoxContainer" parent="ScrollContainer/VBox"]
+[node name="player_height_offset" type="HBoxContainer" parent="ScrollContainer/VBox" unique_id=141970309]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="ScrollContainer/VBox/player_height_offset"]
+[node name="Label" type="Label" parent="ScrollContainer/VBox/player_height_offset" unique_id=308204578]
 layout_mode = 2
 text = "Player Height Offset:"
 
-[node name="Control" type="Control" parent="ScrollContainer/VBox/player_height_offset"]
+[node name="Control" type="Control" parent="ScrollContainer/VBox/player_height_offset" unique_id=1766925943]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="pos" type="SpinBox" parent="ScrollContainer/VBox/player_height_offset"]
+[node name="pos" type="SpinBox" parent="ScrollContainer/VBox/player_height_offset" unique_id=1362694802]
 layout_mode = 2
 min_value = -0.25
 max_value = 0.25
 step = 0.05
 value = -0.25
 
-[node name="disable_map_color" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="disable_map_color" type="CheckButton" parent="ScrollContainer/VBox" unique_id=17732177]
 layout_mode = 2
-theme = SubResource("3")
 text = "Ignore Map's Colors:"
 
-[node name="not_music_dl" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="not_music_dl" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1808881812]
 layout_mode = 2
-theme = SubResource("3")
 text = "Omit Music from Map Download/Upload:"
 
-[node name="swing_scoring" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="swing_scoring" type="CheckButton" parent="ScrollContainer/VBox" unique_id=891334311]
 layout_mode = 2
-theme = SubResource("3")
 text = "Score by Swing and Distance:"
 
-[node name="show_collisions" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="show_collisions" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1013522906]
 layout_mode = 2
-theme = SubResource("3")
 text = "Show Collision Shapes:"
 
-[node name="show_debug" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="show_debug" type="CheckButton" parent="ScrollContainer/VBox" unique_id=247553858]
 layout_mode = 2
-theme = SubResource("3")
 text = "Show Debug Info:"
 
-[node name="spectator_view" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="spectator_view" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1808191811]
 layout_mode = 2
 tooltip_text = "High Performance impact*"
-theme = SubResource("3")
 text = "*Spectator View:"
 
-[node name="spectator_hud" type="CheckButton" parent="ScrollContainer/VBox"]
+[node name="spectator_hud" type="CheckButton" parent="ScrollContainer/VBox" unique_id=1395977084]
 layout_mode = 2
 tooltip_text = "High Performance impact*"
-theme = SubResource("3")
 text = "Spectator HUD:"
 
-[node name="defaults" type="Button" parent="."]
+[node name="defaults" type="Button" parent="." unique_id=937501548]
 layout_mode = 0
-offset_left = 526.283
-offset_top = 596.0
-offset_right = 692.283
-offset_bottom = 636.0
-theme = SubResource("7")
-theme_override_styles/normal = SubResource("10")
-theme_override_styles/pressed = SubResource("9")
-theme_override_styles/hover = SubResource("8")
-text = "Default"
+offset_left = 812.0
+offset_top = 808.0
+offset_right = 1020.0
+offset_bottom = 876.0
+text = "Defaults"
 
-[node name="apply" type="Button" parent="."]
+[node name="apply" type="Button" parent="." unique_id=1215373883]
 layout_mode = 0
-offset_left = 719.136
-offset_top = 596.0
-offset_right = 865.136
-offset_bottom = 636.0
-theme = SubResource("7")
-theme_override_styles/normal = SubResource("10")
-theme_override_styles/pressed = SubResource("9")
-theme_override_styles/hover = SubResource("8")
-text = "Apply"
+offset_left = 1036.0
+offset_top = 808.0
+offset_right = 1236.0
+offset_bottom = 876.0
+theme_type_variation = &"PlayButton"
+theme_override_font_sizes/font_size = 28
+text = "Done"
 
-[node name="vr_slider" parent="." instance=ExtResource("4")]
+[node name="vr_slider" parent="." unique_id=2071517808 instance=ExtResource("4")]
 scroll_node_path = NodePath("../ScrollContainer")
 
 [connection signal="value_changed" from="ScrollContainer/VBox/audio/master/master_slider" to="." method="_on_master_slider_value_changed"]

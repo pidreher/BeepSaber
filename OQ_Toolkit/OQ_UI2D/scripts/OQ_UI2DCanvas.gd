@@ -15,6 +15,9 @@ var ui_collisionshape: CollisionShape3D
 # set to true to prevent UIRayCast marker from colliding with canvas
 @export var disable_collision := false
 @export var update_only_on_input := false
+# The UI is rendered at this multiple of its logical pixel size and sampled
+# down on the quad; at 1x small text looks blocky and shimmers in VR.
+@export_range(1.0, 3.0, 0.25) var supersample := 2.0
 
 var mesh_material: StandardMaterial3D
 @onready var mesh_instance := $UIArea/UIMeshInstance as MeshInstance3D
@@ -46,7 +49,9 @@ func update_size() -> void:
 		ui_area.scale.x = ui_size.x * vr.UI_PIXELS_TO_METER
 		ui_area.scale.y = ui_size.y * vr.UI_PIXELS_TO_METER
 	if (viewport != null):
-		viewport.set_size(ui_size)
+		viewport.size_2d_override = Vector2i(ui_size)
+		viewport.size_2d_override_stretch = true
+		viewport.set_size(ui_size * supersample)
 
 func _hide() -> void:
 	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED

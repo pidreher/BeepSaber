@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://crstqa7v6ehg3" path="res://OQ_Toolkit/OQ_UI2D/OQ_UI2DCanvas.tscn" id="1"]
 [ext_resource type="PackedScene" uid="uid://cjghkpsy3r8tp" path="res://OQ_Toolkit/OQ_UI2D/controls/VirtualKeyboard.tscn" id="2"]
 [ext_resource type="Script" path="res://OQ_Toolkit/OQ_UI2D/scripts/OQ_UI2DKeyboard.gd" id="3"]
-[ext_resource type="Theme" uid="uid://dvcjel72een6o" path="res://OQ_Toolkit/OQ_UI2D/theme/oq_ui2d_standard.theme" id="4"]
+[ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="4"]
 
 [node name="OQ_UI2DKeyboard" type="Node3D"]
 script = ExtResource("3")
@@ -18,8 +18,9 @@ update_only_on_input = false
 
 [node name="TextEdit" type="TextEdit" parent="OQ_UI2DCanvas_TextInput"]
 offset_right = 512.0
-offset_bottom = 48.0
+offset_bottom = 56.0
 theme = ExtResource("4")
+virtual_keyboard_enabled = false
 
 [connection signal="cancel_pressed" from="OQ_UI2DCanvas_Keyboard/VirtualKeyboard" to="." method="_on_cancel"]
 [connection signal="enter_pressed" from="OQ_UI2DCanvas_Keyboard/VirtualKeyboard" to="." method="_on_enter"]

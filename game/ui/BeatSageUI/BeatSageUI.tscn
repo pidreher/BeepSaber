@@ -1,18 +1,18 @@
-[gd_scene load_steps=6 format=3 uid="uid://bmdbiqndkvcm6"]
+[gd_scene format=3 uid="uid://bmdbiqndkvcm6"]
 
-[ext_resource type="Theme" uid="uid://cbutfawaljce6" path="res://game/BlackWhiteThem.tres" id="1"]
+[ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1_wjxuk"]
 [ext_resource type="Script" path="res://game/ui/BeatSageUI/BeatSageUI.gd" id="2"]
-[ext_resource type="Texture2D" uid="uid://6slr1heu84vp" path="res://game/ui/YouTubeUI/youtube_icon.png" id="3"]
-[ext_resource type="Texture2D" uid="uid://bmetc7xglkymg" path="res://game/ui/BeatSageUI/beat_sage_icon.png" id="4"]
-[ext_resource type="PackedScene" uid="uid://bhp4pu5svcgug" path="res://game/ui/BeatSageUI/BeatSageRequest/BeatSageRequest.tscn" id="5"]
+[ext_resource type="Texture2D" path="res://game/ui/YouTubeUI/youtube_icon.png" id="3"]
+[ext_resource type="Texture2D" path="res://game/ui/BeatSageUI/beat_sage_icon.png" id="4"]
+[ext_resource type="PackedScene" path="res://game/ui/BeatSageUI/BeatSageRequest/BeatSageRequest.tscn" id="5"]
 
-[node name="BeatSageUI" type="Panel"]
+[node name="BeatSageUI" type="Panel" unique_id=591973872]
 offset_right = 1536.0
 offset_bottom = 960.0
-theme = ExtResource("1")
+theme = ExtResource("1_wjxuk")
 script = ExtResource("2")
 
-[node name="Icon" type="TextureRect" parent="."]
+[node name="Icon" type="TextureRect" parent="." unique_id=292704275]
 layout_mode = 0
 offset_left = 16.0
 offset_top = 16.0
@@ -22,7 +22,7 @@ texture = ExtResource("4")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="SongLabel" type="Label" parent="."]
+[node name="SongLabel" type="Label" parent="." unique_id=3464950]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 144.0
@@ -30,7 +30,8 @@ offset_right = 257.0
 offset_bottom = 192.0
 text = "Select Song:"
 
-[node name="SongURL" type="LineEdit" parent="."]
+[node name="SongURL" type="LineEdit" parent="." unique_id=50096427]
+virtual_keyboard_enabled = false
 layout_mode = 0
 offset_left = 32.0
 offset_top = 208.0
@@ -38,7 +39,7 @@ offset_right = 872.0
 offset_bottom = 272.0
 placeholder_text = "Paste a link (Youtube, Soundcloud, etc.)"
 
-[node name="SongArtistLabel" type="Label" parent="."]
+[node name="SongArtistLabel" type="Label" parent="." unique_id=1028734980]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 288.0
@@ -46,14 +47,15 @@ offset_right = 257.0
 offset_bottom = 336.0
 text = "Song Artist:"
 
-[node name="SongArtist" type="LineEdit" parent="."]
+[node name="SongArtist" type="LineEdit" parent="." unique_id=921126555]
+virtual_keyboard_enabled = false
 layout_mode = 0
 offset_left = 264.0
 offset_top = 280.0
 offset_right = 784.0
 offset_bottom = 344.0
 
-[node name="SongNameLabel" type="Label" parent="."]
+[node name="SongNameLabel" type="Label" parent="." unique_id=261701348]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 360.0
@@ -61,14 +63,15 @@ offset_right = 257.0
 offset_bottom = 408.0
 text = "Song Name:"
 
-[node name="SongName" type="LineEdit" parent="."]
+[node name="SongName" type="LineEdit" parent="." unique_id=1902829420]
+virtual_keyboard_enabled = false
 layout_mode = 0
 offset_left = 264.0
 offset_top = 352.0
 offset_right = 784.0
 offset_bottom = 416.0
 
-[node name="YoutubeButton" type="TextureButton" parent="."]
+[node name="YoutubeButton" type="TextureButton" parent="." unique_id=667151415]
 layout_mode = 0
 offset_left = 888.0
 offset_top = 216.0
@@ -76,7 +79,7 @@ offset_right = 1104.0
 offset_bottom = 264.0
 texture_normal = ExtResource("3")
 
-[node name="SongCover" type="TextureRect" parent="."]
+[node name="SongCover" type="TextureRect" parent="." unique_id=354180572]
 layout_mode = 0
 offset_left = 1160.0
 offset_top = 208.0
@@ -85,7 +88,7 @@ offset_bottom = 432.0
 expand_mode = 1
 stretch_mode = 6
 
-[node name="DifficultyLabel" type="Label" parent="."]
+[node name="DifficultyLabel" type="Label" parent="." unique_id=1597212551]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 448.0
@@ -93,7 +96,7 @@ offset_right = 331.0
 offset_bottom = 496.0
 text = "Difficulty Levels:"
 
-[node name="ExperimentalLabel" type="Label" parent="."]
+[node name="ExperimentalLabel" type="Label" parent="." unique_id=1655236168]
 layout_mode = 0
 offset_left = 16.0
 offset_top = 896.0
@@ -101,7 +104,7 @@ offset_right = 487.0
 offset_bottom = 944.0
 text = "(*) = Experimental Feature"
 
-[node name="DifficultyNormal" type="CheckBox" parent="."]
+[node name="DifficultyNormal" type="CheckBox" parent="." unique_id=1558611656]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 504.0
@@ -109,7 +112,7 @@ offset_right = 200.0
 offset_bottom = 568.0
 text = "Normal"
 
-[node name="DifficultyHard" type="CheckBox" parent="."]
+[node name="DifficultyHard" type="CheckBox" parent="." unique_id=509217600]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 584.0
@@ -117,7 +120,7 @@ offset_right = 200.0
 offset_bottom = 648.0
 text = "Hard"
 
-[node name="DifficultyExpert" type="CheckBox" parent="."]
+[node name="DifficultyExpert" type="CheckBox" parent="." unique_id=2119862458]
 layout_mode = 0
 offset_left = 216.0
 offset_top = 504.0
@@ -125,7 +128,7 @@ offset_right = 384.0
 offset_bottom = 568.0
 text = "Expert"
 
-[node name="DifficultyExpertPlus" type="CheckBox" parent="."]
+[node name="DifficultyExpertPlus" type="CheckBox" parent="." unique_id=1792410729]
 layout_mode = 0
 offset_left = 216.0
 offset_top = 584.0
@@ -133,7 +136,7 @@ offset_right = 384.0
 offset_bottom = 648.0
 text = "Expert+"
 
-[node name="GameModeLabel" type="Label" parent="."]
+[node name="GameModeLabel" type="Label" parent="." unique_id=2037683531]
 layout_mode = 0
 offset_left = 488.0
 offset_top = 448.0
@@ -141,7 +144,7 @@ offset_right = 787.0
 offset_bottom = 496.0
 text = "Game Mode:"
 
-[node name="ModeStandard" type="CheckBox" parent="."]
+[node name="ModeStandard" type="CheckBox" parent="." unique_id=1085479046]
 layout_mode = 0
 offset_left = 488.0
 offset_top = 504.0
@@ -149,7 +152,7 @@ offset_right = 712.0
 offset_bottom = 568.0
 text = "Standard"
 
-[node name="ModeNoArrows" type="CheckBox" parent="."]
+[node name="ModeNoArrows" type="CheckBox" parent="." unique_id=1497164375]
 layout_mode = 0
 offset_left = 488.0
 offset_top = 584.0
@@ -157,7 +160,7 @@ offset_right = 712.0
 offset_bottom = 648.0
 text = "No Arrows"
 
-[node name="ModeOneSaber" type="CheckBox" parent="."]
+[node name="ModeOneSaber" type="CheckBox" parent="." unique_id=50929328]
 layout_mode = 0
 offset_left = 728.0
 offset_top = 504.0
@@ -165,7 +168,7 @@ offset_right = 952.0
 offset_bottom = 568.0
 text = "One Saber (*)"
 
-[node name="SongEventsLabel" type="Label" parent="."]
+[node name="SongEventsLabel" type="Label" parent="." unique_id=230448993]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 688.0
@@ -173,7 +176,7 @@ offset_right = 331.0
 offset_bottom = 736.0
 text = "Song Events:"
 
-[node name="EventsBombs" type="CheckBox" parent="."]
+[node name="EventsBombs" type="CheckBox" parent="." unique_id=829322615]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 744.0
@@ -181,7 +184,7 @@ offset_right = 256.0
 offset_bottom = 808.0
 text = "Bombs"
 
-[node name="EventsDotBlocks" type="CheckBox" parent="."]
+[node name="EventsDotBlocks" type="CheckBox" parent="." unique_id=1466695708]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 824.0
@@ -189,7 +192,7 @@ offset_right = 256.0
 offset_bottom = 888.0
 text = "Dot Blocks"
 
-[node name="EventsObstacles" type="CheckBox" parent="."]
+[node name="EventsObstacles" type="CheckBox" parent="." unique_id=861404967]
 layout_mode = 0
 offset_left = 272.0
 offset_top = 744.0
@@ -197,7 +200,7 @@ offset_right = 496.0
 offset_bottom = 808.0
 text = "Obstacles (*)"
 
-[node name="ModelLabel" type="Label" parent="."]
+[node name="ModelLabel" type="Label" parent="." unique_id=563863980]
 layout_mode = 0
 offset_left = 592.0
 offset_top = 688.0
@@ -205,14 +208,14 @@ offset_right = 891.0
 offset_bottom = 736.0
 text = "AI Model:"
 
-[node name="ModelButton" type="OptionButton" parent="."]
+[node name="ModelButton" type="OptionButton" parent="." unique_id=1144550137]
 layout_mode = 0
 offset_left = 592.0
 offset_top = 744.0
 offset_right = 1128.0
 offset_bottom = 808.0
 
-[node name="SubmitButton" type="Button" parent="."]
+[node name="SubmitButton" type="Button" parent="." unique_id=1110787643]
 layout_mode = 0
 offset_left = 1112.0
 offset_top = 880.0
@@ -220,7 +223,7 @@ offset_right = 1308.0
 offset_bottom = 944.0
 text = "Submit"
 
-[node name="CloseButton" type="Button" parent="."]
+[node name="CloseButton" type="Button" parent="." unique_id=310974270]
 layout_mode = 0
 offset_left = 1320.0
 offset_top = 880.0
@@ -228,7 +231,7 @@ offset_right = 1516.0
 offset_bottom = 944.0
 text = "Close"
 
-[node name="ProgressScreen" type="ColorRect" parent="."]
+[node name="ProgressScreen" type="ColorRect" parent="." unique_id=1822682049]
 visible = false
 layout_mode = 0
 offset_left = 16.0
@@ -237,7 +240,7 @@ offset_right = 1520.0
 offset_bottom = 944.0
 color = Color(0, 0, 0, 1)
 
-[node name="ProgressNoteLabel" type="Label" parent="ProgressScreen"]
+[node name="ProgressNoteLabel" type="Label" parent="ProgressScreen" unique_id=473550481]
 layout_mode = 0
 offset_left = 240.0
 offset_top = 352.0
@@ -245,7 +248,7 @@ offset_right = 1264.0
 offset_bottom = 400.0
 text = "Beat Sage can take up to 2 mins to process some songs."
 
-[node name="ProgressBar" type="ProgressBar" parent="ProgressScreen"]
+[node name="ProgressBar" type="ProgressBar" parent="ProgressScreen" unique_id=1723256104]
 layout_mode = 0
 offset_left = 368.0
 offset_top = 448.0
@@ -254,7 +257,7 @@ offset_bottom = 504.0
 max_value = 120.0
 step = 1.0
 
-[node name="CancelButton" type="Button" parent="ProgressScreen"]
+[node name="CancelButton" type="Button" parent="ProgressScreen" unique_id=1813424795]
 layout_mode = 0
 offset_left = 1304.0
 offset_top = 752.0
@@ -262,7 +265,7 @@ offset_right = 1504.0
 offset_bottom = 816.0
 text = "Cancel"
 
-[node name="BeatSageRequest" parent="." instance=ExtResource("5")]
+[node name="BeatSageRequest" parent="." unique_id=443244552 instance=ExtResource("5")]
 
 [connection signal="text_submitted" from="SongURL" to="." method="_on_SongURL_text_entered"]
 [connection signal="text_submitted" from="SongArtist" to="." method="_on_SongURL_text_entered"]

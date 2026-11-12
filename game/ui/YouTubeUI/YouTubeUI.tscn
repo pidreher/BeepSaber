@@ -1,22 +1,22 @@
-[gd_scene load_steps=8 format=3 uid="uid://cb8ftj7lpxrfy"]
+[gd_scene format=3 uid="uid://cb8ftj7lpxrfy"]
 
-[ext_resource type="Theme" uid="uid://cbutfawaljce6" path="res://game/BlackWhiteThem.tres" id="1"]
+[ext_resource type="Theme" path="res://game/ui/theme/open_saber_theme.tres" id="1_jf2sv"]
 [ext_resource type="Script" path="res://game/ui/YouTubeUI/YouTubeUI.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://bw1m0m5qftnsb" path="res://game/ui/YouTubeUI/YouTubeAPI/YouTubeAPI.tscn" id="3"]
-[ext_resource type="PackedScene" uid="uid://chg13dcum75og" path="res://game/scripts/HTTPRequestPool.tscn" id="4"]
-[ext_resource type="Texture2D" uid="uid://6slr1heu84vp" path="res://game/ui/YouTubeUI/youtube_icon.png" id="5"]
-[ext_resource type="Texture2D" uid="uid://cxvyqmtckg782" path="res://game/ui/YouTubeUI/default_thumbnail.png" id="6"]
+[ext_resource type="PackedScene" path="res://game/ui/YouTubeUI/YouTubeAPI/YouTubeAPI.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://game/scripts/HTTPRequestPool.tscn" id="4"]
+[ext_resource type="Texture2D" path="res://game/ui/YouTubeUI/youtube_icon.png" id="5"]
+[ext_resource type="Texture2D" path="res://game/ui/YouTubeUI/default_thumbnail.png" id="6"]
 [ext_resource type="Script" path="res://game/vr_slider.gd" id="7"]
 
-[node name="YouTubeUI" type="Panel"]
+[node name="YouTubeUI" type="Panel" unique_id=433366350]
 offset_right = 1536.0
 offset_bottom = 960.0
-theme = ExtResource("1")
+theme = ExtResource("1_jf2sv")
 script = ExtResource("2")
 
-[node name="YouTubeAPI" parent="." instance=ExtResource("3")]
+[node name="YouTubeAPI" parent="." unique_id=1917249384 instance=ExtResource("3")]
 
-[node name="YoutubeIcon" type="TextureRect" parent="."]
+[node name="YoutubeIcon" type="TextureRect" parent="." unique_id=1864632871]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 24.0
@@ -25,7 +25,8 @@ offset_bottom = 64.0
 texture = ExtResource("5")
 expand_mode = 1
 
-[node name="SearchLineEdit" type="LineEdit" parent="."]
+[node name="SearchLineEdit" type="LineEdit" parent="." unique_id=855689021]
+virtual_keyboard_enabled = false
 layout_mode = 0
 offset_left = 224.0
 offset_top = 16.0
@@ -35,7 +36,7 @@ text = "heartbreak anthem"
 caret_blink = true
 caret_blink_interval = 0.5
 
-[node name="SearchButton" type="Button" parent="."]
+[node name="SearchButton" type="Button" parent="." unique_id=495774419]
 layout_mode = 0
 offset_left = 952.0
 offset_top = 16.0
@@ -43,7 +44,7 @@ offset_right = 1088.0
 offset_bottom = 72.0
 text = "Search"
 
-[node name="ResultsList" type="ItemList" parent="."]
+[node name="ResultsList" type="ItemList" parent="." unique_id=2034590418]
 layout_mode = 0
 offset_left = 16.0
 offset_top = 80.0
@@ -52,7 +53,7 @@ offset_bottom = 944.0
 script = ExtResource("7")
 scroll_node_path = NodePath(".")
 
-[node name="SelectSongButton" type="Button" parent="."]
+[node name="SelectSongButton" type="Button" parent="." unique_id=236656547]
 layout_mode = 0
 offset_left = 1096.0
 offset_top = 880.0
@@ -61,7 +62,7 @@ offset_bottom = 944.0
 disabled = true
 text = "Select Song"
 
-[node name="BackButton" type="Button" parent="."]
+[node name="BackButton" type="Button" parent="." unique_id=741464036]
 layout_mode = 0
 offset_left = 1312.0
 offset_top = 880.0
@@ -69,9 +70,9 @@ offset_right = 1520.0
 offset_bottom = 944.0
 text = "Back"
 
-[node name="ThumbnailRequestPool" parent="." instance=ExtResource("4")]
+[node name="ThumbnailRequestPool" parent="." unique_id=157145729 instance=ExtResource("4")]
 
-[node name="DefaultThumbnail" type="TextureRect" parent="."]
+[node name="DefaultThumbnail" type="TextureRect" parent="." unique_id=900136043]
 visible = false
 layout_mode = 0
 offset_right = 200.0

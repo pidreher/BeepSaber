@@ -1,0 +1,7 @@
+[gd_resource type="FontVariation" format=3]
+
+[ext_resource type="FontFile" path="res://OQ_Toolkit/OQ_UI2D/theme/Roboto-Medium.ttf" id="1_h8528"]
+
+[resource]
+base_font = ExtResource("1_h8528")
+variation_embolden = 0.6

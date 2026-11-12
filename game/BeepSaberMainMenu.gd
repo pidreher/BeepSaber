@@ -15,30 +15,34 @@ signal start_map(info: MapInfo, difficulty: DifficultyInfo, health: bool)
 var _cover_texture_create_sw := StopwatchFactory.create("cover_texture_create",10,true)
 
 const FAVORITE_MASK := 0x4000000000000000
+const FAVORITE_COLOR := Color("ffc93d")
 @export var main_song_player_ref: AudioStreamPlayer
 @export var keyboard: OQ_UI2DKeyboard
 @export var beepsaber_game : BeepSaber_Game
 
 @export var song_uploader_ref: SongUploader
 
-@onready var playlist_selector := $PlaylistSelector as OptionButton
+@onready var playlist_selector := %PlaylistSelector as OptionButton
 @onready var _bg_img_loader := preload("res://game/scripts/BackgroundImgLoader.gd").new()
 
-@onready var cover := $cover as TextureRect
-@onready var songs_menu := $SongsMenu as ItemList
-@onready var diff_menu := $DifficultyMenu as ItemList
-@onready var delete_button := $Delete_Button as Button
-@onready var health_control := $Modifiers/Health as CheckButton
-@onready var bombs_control := $Modifiers/Health/Bombs as CheckButton
-@onready var arrows_control := $Modifiers/Health/Bombs/Arrows as CheckButton
-@onready var flip_control := $Modifiers3/Flip as OptionButton
-@onready var handedness_control := $Modifiers3/Flip/Speed/Handedness as OptionButton
-@onready var claws_control := $Modifiers2/Claws as CheckButton
-@onready var size_control := $Modifiers2/Claws/Size as OptionButton
-@onready var width_control := $Modifiers2/Claws/Size/Width as OptionButton
-@onready var speed_control := $Modifiers3/Flip/Speed as OptionButton
-@onready var favorite_button := $Favorite_Button as Button
-@onready var reset_button := $Reset_Button as Button
+@onready var cover := %cover as TextureRect
+@onready var songs_menu := %SongsMenu as ItemList
+@onready var diff_menu := %DifficultyMenu as ItemList
+@onready var delete_button := %Delete_Button as Button
+@onready var health_control := %Health as CheckButton
+@onready var bombs_control := %Bombs as CheckButton
+@onready var arrows_control := %Arrows as CheckButton
+@onready var flip_control := %Flip as OptionButton
+@onready var handedness_control := %Handedness as OptionButton
+@onready var claws_control := %Claws as CheckButton
+@onready var size_control := %Size as OptionButton
+@onready var width_control := %Width as OptionButton
+@onready var speed_control := %Speed as OptionButton
+@onready var favorite_button := %Favorite_Button as Button
+@onready var reset_button := %Reset_Button as Button
+@onready var song_title_label := %SongTitle_Label as Label
+@onready var song_info_label := %SongInfo_Label as Label
+@onready var search_filter_label := %SearchFilter_Label as Label
 
 @onready var song_preview := $song_prev as AudioStreamPlayer
 var song_preview_transition_time := 1.0
@@ -207,8 +211,11 @@ func _set_cur_playlist(songs: Array[MapInfo]) -> void:
 	var map_index := 0
 	for map in songs:
 		@warning_ignore("return_value_discarded")
-		songs_menu.add_item("%s - %s%s" % [map.song_author_name, map.song_name, "" if map.have_song else " [silent]"], default_song_icon)
-		songs_menu.set_item_custom_fg_color(map_index, Color.YELLOW if PlayCount.is_favorite(map) else Color.WHITE)
+		songs_menu.add_item("%s   ·   %s%s" % [
+			map.song_name, map.song_author_name, "  [silent]" if not map.have_song else ""
+		], default_song_icon)
+		if PlayCount.is_favorite(map):
+			songs_menu.set_item_custom_fg_color(map_index, FAVORITE_COLOR)
 		_bg_img_loader.load_texture(map.filepath, map.cover_image_filename, _on_cover_loaded, false, map_index)
 		map_index += 1
 		
@@ -281,14 +288,12 @@ func _select_song(id: int) -> void:
 	favorite_button.show()
 	
 	var map := _currently_selected_songlist_ref[id]
-	($SongInfo_Label as Label).text = """Song Author: %s
-	Song Title: %s
-	Beatmap Author: %s
-	Play Count: %d%s""" % [
+	song_title_label.text = map.song_name if map.song_sub_name.is_empty() else "%s %s" % [map.song_name, map.song_sub_name]
+	var plays := PlayCount.get_total_play_count(map)
+	song_info_label.text = "%s\nMapped by %s\n%s%s" % [
 		map.song_author_name,
-		map.song_name,
-		map.level_author_name,
-		PlayCount.get_total_play_count(map),
+		map.level_author_name if not map.level_author_name.is_empty() else "unknown",
+		"Not played yet" if plays == 0 else ("Played once" if plays == 1 else "Played %d times" % plays),
 		_describe_map_mods(map)
 	]
 	
@@ -324,7 +329,7 @@ func _describe_map_mods(map: MapInfo) -> String:
 	var described: Array[String] = []
 	for mod in mods:
 		described.append(mod if mod in SUPPORTED_MAP_MODS else mod + " (unsupported)")
-	return "\n\tMods: " + ", ".join(described)
+	return "\nMods: " + ", ".join(described)
 
 func _on_stop_prev_timeout() -> void:
 	var song_prev_Tween := song_preview.create_tween().set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
@@ -445,15 +450,15 @@ func _ready() -> void:
 	playlist_selector.item_selected.emit(1)
 	
 	if song_uploader_ref and song_uploader_ref.active:
-		$upload_url.text = "Manually Upload Songs/Backgrounds: \n%s"%[
+		%upload_url.text = "Upload songs & backgrounds: %s"%[
 			song_uploader_ref.get_server_url()
 		]
 	else:
-		$upload_url.text = ""
+		%upload_url.text = ""
 	
-	$version.text = beepsaber_game.version
+	%version.text = beepsaber_game.version
 	if OS.get_name() == &"Web":
-		$Exit_Button.hide()
+		%Exit_Button.hide()
 		
 func on_settings_changed(key: StringName) -> void:
 	match key:
@@ -529,7 +534,7 @@ func _text_input_cancel() -> void:
 
 func _text_input_changed() -> void:
 	var text := keyboard._text_edit.text
-	($Search_Button/Label as Label).text = text
+	search_filter_label.text = text
 	if text == "":
 		_clean_search()
 		return
@@ -548,7 +553,7 @@ func _text_input_changed() -> void:
 
 func _clean_search() -> void:
 	_on_PlaylistSelector_item_selected(playlist_selector.get_selected_id())
-	($Search_Button/Label as Label).text = ""
+	search_filter_label.text = ""
 
 func _on_PlaylistSelector_item_selected(id: int) -> void:
 	match id:
@@ -564,11 +569,11 @@ func _on_PlaylistSelector_item_selected(id: int) -> void:
 
 func _on_licenses_pressed() -> void:
 	var license := FileAccess.open("res://LICENSE", FileAccess.READ).get_as_text()
-	$LicensePopup/ScrollContainer/Label.text = license
+	%LicensePopup.get_node("ScrollContainer/Label").text = license
 	if licenses_showing:
-		$LicensePopup.hide()
+		%LicensePopup.hide()
 	else:
-		$LicensePopup.show()
+		%LicensePopup.show()
 	licenses_showing = not licenses_showing
 	return
 	
@@ -615,18 +620,11 @@ func _set_reset_icon() -> void:
 	if _are_mods_default():
 		reset_button.hide()
 	else:
-		reset_button.text = "\u21BA" 
 		reset_button.show()
 
 func _set_favorite_icon(value: bool) -> void:
-	favorite_button.text = "\u2605" if value else "\u2606"
-	var color := Color.YELLOW if value else Color.WHITE
-	favorite_button.add_theme_color_override("font_color", color)
-	favorite_button.add_theme_color_override("font_disabled_color", color)
-	favorite_button.add_theme_color_override("font_focus_color", color)
-	favorite_button.add_theme_color_override("font_hover_color", color)
-	favorite_button.add_theme_color_override("font_hover_pressed_color", color)
-	favorite_button.add_theme_color_override("font_pressed_color", color)
+	favorite_button.icon = get_theme_icon(&"star_on" if value else &"star_off", &"MainMenu")
+	favorite_button.tooltip_text = "Remove from favorites" if value else "Add to favorites"
 
 func _on_favorite_button_pressed() -> void:
 	var map := _currently_selected_songlist_ref[current_selected]
