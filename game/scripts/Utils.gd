@@ -103,29 +103,37 @@ static func binary_to_json(data: PackedByteArray) -> Dictionary:
 	
 static var thread_finished : Array[Thread] = []
 static var fake_thread_finished = {}
+# the map loader starts and joins threads from worker threads too, so the
+# bookkeeping above is shared between threads and must be locked
+static var _thread_mutex := Mutex.new()
 
 static func custom_thread_wait_to_finish(thread : Thread):
-	if thread in thread_finished:
-		var r = thread.wait_to_finish()
-		thread_finished.remove_at(thread_finished.find(thread))
-		return r
-	elif thread in fake_thread_finished:
-		var r = fake_thread_finished[thread]
+	_thread_mutex.lock()
+	var started := thread in thread_finished
+	if started:
+		thread_finished.erase(thread)
+	var faked := not started and thread in fake_thread_finished
+	var fake_result = fake_thread_finished.get(thread)
+	if faked:
 		fake_thread_finished.erase(thread)
-		return r
-	return null
+	_thread_mutex.unlock()
+	if started:
+		return thread.wait_to_finish()
+	return fake_result if faked else null
 
 static func custom_thread_call(thread : Thread, function : Callable, params := []):
 	if OS.get_name() == &"Web":
-		fake_thread_finished[thread] = function.callv(params)
+		var result = function.callv(params)
+		_thread_mutex.lock()
+		fake_thread_finished[thread] = result
+		_thread_mutex.unlock()
 		return 0
 	else:
+		_thread_mutex.lock()
 		thread_finished.append(thread)
+		_thread_mutex.unlock()
 		return thread.start(function.bindv(params))
 
-# Mapping Extensions precise placement: values >= 1000 or <= -1000 are in
-# 1/1000 lane units, offset so that +-1000 both mean lane/layer 0.
-# Values in between are plain (possibly extended) lane indices.
 static func precise_measurement(x: float) -> float:
 	if x >= 1000:
 		return (x - 1000.) / 1000.
