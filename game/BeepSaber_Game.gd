@@ -168,6 +168,32 @@ func _submit_highscore(player_name: String) -> void:
 			
 		_transition_game_state(gamestate_mapcomplete)
 
+# Sabers are Area3Ds without a collision layer, so the physics engine never
+# reports them touching each other; check the distance between the blades.
+const SABER_CLASH_DISTANCE := 0.05
+var _saber_clash_active := false
+
+func _update_saber_clash() -> void:
+	var touching := false
+	if left_saber.is_extended() and right_saber.is_extended():
+		var l := _saber_blade(left_saber)
+		var r := _saber_blade(right_saber)
+		var closest := Geometry3D.get_closest_points_between_segments(l[0], l[1], r[0], r[1])
+		touching = closest[0].distance_to(closest[1]) < SABER_CLASH_DISTANCE
+	if touching:
+		# strong hit when the blades meet, then a lighter buzz while they stay in contact
+		var first_contact := not _saber_clash_active
+		for controller: BeepSaberController in [left_controller, right_controller]:
+			if first_contact:
+				controller.simple_rumble(1.0, 0.12)
+			elif not controller.is_simple_rumbling():
+				controller.simple_rumble(0.45, 0.06)
+	_saber_clash_active = touching
+
+func _saber_blade(saber: LightSaber) -> PackedVector3Array:
+	var base := saber.collision_shape.global_transform * Vector3(0, -saber.collision_cylinder.height * 0.5, 0)
+	return PackedVector3Array([base, saber.saber_visual.tip.global_transform.origin])
+
 func _check_and_update_saber(controller: BeepSaberController, saber: LightSaber) -> void:
 	# to allow extending/sheething the saber while not playing a song
 	if ((not song_player.playing)
@@ -205,6 +231,7 @@ func _physics_process(_dt: float) -> void:
 	
 	gamestate._physics_process(self)
 	
+	_update_saber_clash()
 	_check_and_update_saber(left_controller, left_saber)
 	_check_and_update_saber(right_controller, right_saber)
 
