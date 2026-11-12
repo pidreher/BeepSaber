@@ -45,8 +45,27 @@ var right_color: Color
 
 @export var disabled := false
 
+# Haze like in Beat Saber: distance + ground fog whose color follows the
+# current light colors, so flashes bleed into the atmosphere.
+const FOG_BASE_COLOR := Color(0.02, 0.025, 0.05)
+const FOG_LIGHT_INFLUENCE := 0.3
+var _light_colors: Array[Color] = [Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK]
+var _environment: Environment
+
 func _ready() -> void:
 	track_lights_holder.hide()
+	var world_env := get_tree().get_first_node_in_group(&"enviroment") as WorldEnvironment
+	if world_env and world_env.environment:
+		_environment = world_env.environment
+		_environment.fog_enabled = true
+		_environment.fog_mode = Environment.FOG_MODE_EXPONENTIAL
+		_environment.fog_density = 0.022
+		_environment.fog_light_color = FOG_BASE_COLOR
+		_environment.fog_light_energy = 1.0
+		_environment.fog_sun_scatter = 0.0
+		_environment.fog_sky_affect = 0.0
+		_environment.fog_height = 0.6
+		_environment.fog_height_density = 0.12
 	
 	set_background_texture()
 	
@@ -136,6 +155,13 @@ func set_background() -> void:
 			turn_light_on(EventInfo.TYPE_FLOOR_LIGHTS, Color.WHITE)
 
 func _process(delta: float) -> void:
+	if _environment:
+		var lights := Color.BLACK
+		for c in _light_colors:
+			lights += c
+		var target := FOG_BASE_COLOR + lights * (FOG_LIGHT_INFLUENCE / _light_colors.size())
+		_environment.fog_light_color = _environment.fog_light_color.lerp(target, clampf(delta * 8.0, 0.0, 1.0))
+		sphere_material.set_shader_parameter(&"haze_color", _environment.fog_light_color * 1.1)
 	# update the level animations
 	#procces ring rotations
 	if ring_rot_speed > 0:
@@ -341,4 +367,5 @@ func fade_light(type: int, from: Color, to: Color, turn_off_after_fade: bool, tr
 		_on_Tween_tween_step(Color.BLACK, type)
 
 func _on_Tween_tween_step(value: Color, id: int) -> void:
+	_light_colors[id] = value
 	sphere_material.set_shader_parameter("bg_%d_intensity"%id,value.v)
