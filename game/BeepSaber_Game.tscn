@@ -263,8 +263,9 @@ beat_saver_panel = NodePath("../../BeatSaver_Canvas/BeatSaverPanel")
 beat_sage_panel = NodePath("../../BeatSage_Canvas/BeatSageUI")
 
 [node name="BeatSaver_Canvas" parent="MapSourceDialogs" unique_id=1832345664 instance=ExtResource("3")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+transform = Transform3D(1.7, 0, 0, 0, 1.7, 0, 0, 0, 1.7, 0, 0, 0)
 visible = false
+supersample = 1.75
 
 [node name="BeatSaverPanel" parent="MapSourceDialogs/BeatSaver_Canvas" unique_id=187967703 node_paths=PackedStringArray("main_menu_ref", "keyboard") instance=ExtResource("20")]
 main_menu_ref = NodePath("../../../MainMenu_OQ_UI2DCanvas/BeepSaberMainMenu")
