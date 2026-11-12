@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://dvj8dorx2l7s0"]
 
 [ext_resource type="Script" path="res://game/BeepCube/BeepCube.gd" id="1_7mymb"]
-[ext_resource type="PackedScene" uid="uid://bghawm0dmboxm" path="res://game/BeepCube/BeepCubeMesh.glb" id="2_sbb11"]
+[ext_resource type="ArrayMesh" path="res://game/BeepCube/BeepCubeRounded.res" id="2_sbb11"]
 [ext_resource type="Shader" path="res://game/BeepCube/BeepCube.gdshader" id="3_7slj3"]
 [ext_resource type="Texture2D" uid="uid://drc5tdiltfqnk" path="res://game/BeepCube/BeepCubeEmission.png" id="4_10m2m"]
 [ext_resource type="PackedScene" uid="uid://cplhsipk6vhem" path="res://game/BeepCube/BeepCube_SliceParticles.tscn" id="5_tissj"]
@@ -115,7 +115,8 @@ libraries = {
 "": SubResource("AnimationLibrary_7xfev")
 }
 
-[node name="BeepCubeMesh" parent="." instance=ExtResource("2_sbb11")]
+[node name="BeepCubeMesh" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_sbb11")
 transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0)
 layers = 3
 material_override = SubResource("ShaderMaterial_ju3ro")
