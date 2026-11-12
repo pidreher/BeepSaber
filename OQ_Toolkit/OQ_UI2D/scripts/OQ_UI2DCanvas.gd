@@ -10,7 +10,9 @@ var ui_collisionshape: CollisionShape3D
 
 @export var editor_live_update := false
 
-@export var transparency: BaseMaterial3D.Transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+# The viewport has transparent pixels outside rounded panels and controls.
+# Preserve those pixels when displaying the viewport on the 3D surface.
+@export var transparency: BaseMaterial3D.Transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
 # set to true to prevent UIRayCast marker from colliding with canvas
 @export var disable_collision := false
@@ -68,7 +70,6 @@ func _show() -> void:
 func _ready() -> void:
 	mesh_material = mesh_instance.material_override as StandardMaterial3D
 	mesh_material.albedo_texture = viewport.get_texture()
-	# only enable transparency when necessary as it is significantly slower than non-transparent rendering
 	mesh_material.transparency = transparency
 	
 	if Engine.is_editor_hint():

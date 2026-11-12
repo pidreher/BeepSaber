@@ -71,6 +71,42 @@ var _rumble_duration_remaining := 0.0
 
 var _rumble_intensity := 0.0
 
+# OpenXR's basic vibration output accepts one frequency at a time. Interleave
+# a deep layer with the original runtime-tuned buzz, rather than sending two
+# pulses that immediately replace each other. A slow envelope gives the deep
+# layer a gentle breathing feel. Both layers follow the arc's distance ramp.
+const ARC_BASS_FREQUENCY := 85.0
+const ARC_PULSE_RATE := 2.2
+const ARC_LAYER_PERIOD := 0.08
+const ARC_BASS_SHARE := 0.7
+const ARC_PULSE_DURATION := 0.05
+var _arc_strength := 0.0
+var _arc_time := 0.0
+
+# Multiple arcs on the same hand contribute their strongest proximity value.
+func arc_rumble(intensity: float) -> void:
+	_arc_strength = maxf(_arc_strength, clampf(intensity, 0.0, 1.0))
+
+func _process(delta: float) -> void:
+	_update_arc_rumble(delta)
+
+func _update_arc_rumble(delta: float) -> void:
+	var strength := _arc_strength
+	_arc_strength = 0.0
+	if Scoreboard.paused or strength <= 0.0:
+		_arc_time = 0.0
+		return
+	_arc_time += delta
+	# Preserve the existing hit/clash/failure pulses for their full duration.
+	if _is_simple_rumbling: return
+	var bass_layer := fposmod(_arc_time, ARC_LAYER_PERIOD) < ARC_LAYER_PERIOD * ARC_BASS_SHARE
+	var breath := 0.86 + 0.12 * sin(TAU * ARC_PULSE_RATE * _arc_time)
+	_send_rumble(ARC_BASS_FREQUENCY if bass_layer else 0.0,
+		strength * breath if bass_layer else strength, ARC_PULSE_DURATION)
+
+func _send_rumble(frequency: float, intensity: float, duration: float) -> void:
+	trigger_haptic_pulse("haptic", frequency, intensity, duration, 0)
+
 # like simple_rumble, but only replaces a running rumble if it is not stronger
 # (lets continuous effects update every frame without cutting off hit pulses)
 func rumble_at_least(intensity: float, duration: float) -> void:
@@ -86,7 +122,7 @@ func simple_rumble(intensity: float, duration: float) -> void:
 		# frequency 0 = XR_FREQUENCY_UNSPECIFIED: the runtime drives the motor at
 		# its optimal frequency. The previous 20 Hz is far below the resonance of
 		# controller vibration motors and made every hit feel weak.
-		trigger_haptic_pulse("haptic", 0.0, intensity, duration, 0)
+		_send_rumble(0.0, intensity, duration)
 	
 func is_simple_rumbling() -> bool:
 	return _is_simple_rumbling

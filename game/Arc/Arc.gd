@@ -87,4 +87,4 @@ func _update_haptics() -> void:
 		distance = minf(distance, path.curve.get_closest_point(p).distance_to(p))
 	if distance > ARC_HAPTIC_START_DISTANCE: return
 	var closeness := 1.0 - clampf((distance - ARC_HAPTIC_FULL_DISTANCE) / (ARC_HAPTIC_START_DISTANCE - ARC_HAPTIC_FULL_DISTANCE), 0.0, 1.0)
-	controller.rumble_at_least(lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness), 0.05)
+	controller.arc_rumble(lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness))
