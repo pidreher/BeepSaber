@@ -47,8 +47,8 @@ var right_color: Color
 
 # Haze like in Beat Saber: distance + ground fog whose color follows the
 # current light colors, so flashes bleed into the atmosphere.
-const FOG_BASE_COLOR := Color(0.02, 0.025, 0.05)
-const FOG_LIGHT_INFLUENCE := 0.3
+const FOG_BASE_COLOR := Color(0.012, 0.014, 0.03)
+const FOG_LIGHT_INFLUENCE := 0.36
 var _light_colors: Array[Color] = [Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK]
 var _environment: Environment
 
@@ -59,13 +59,13 @@ func _ready() -> void:
 		_environment = world_env.environment
 		_environment.fog_enabled = true
 		_environment.fog_mode = Environment.FOG_MODE_EXPONENTIAL
-		_environment.fog_density = 0.022
+		_environment.fog_density = 0.034
 		_environment.fog_light_color = FOG_BASE_COLOR
 		_environment.fog_light_energy = 1.0
 		_environment.fog_sun_scatter = 0.0
 		_environment.fog_sky_affect = 0.0
-		_environment.fog_height = 0.6
-		_environment.fog_height_density = 0.12
+		_environment.fog_height = 0.9
+		_environment.fog_height_density = 0.22
 	
 	set_background_texture()
 	
