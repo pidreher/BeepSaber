@@ -361,7 +361,7 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="ScrollContainer/VBox/player_height_offset" unique_id=308204578]
 layout_mode = 2
-text = "Player Height Offset:"
+text = "Fine height adjustment (m):"
 
 [node name="Control" type="Control" parent="ScrollContainer/VBox/player_height_offset" unique_id=1766925943]
 layout_mode = 2
@@ -369,10 +369,11 @@ size_flags_horizontal = 3
 
 [node name="pos" type="SpinBox" parent="ScrollContainer/VBox/player_height_offset" unique_id=1362694802]
 layout_mode = 2
-min_value = -0.25
-max_value = 0.25
-step = 0.05
-value = -0.25
+tooltip_text = "Positive values raise your virtual position, making cubes lower to reach. Use Seated play and Center & height in Now Playing first."
+min_value = -1.0
+max_value = 1.0
+step = 0.01
+value = 0.0
 
 [node name="disable_map_color" type="CheckButton" parent="ScrollContainer/VBox" unique_id=17732177]
 layout_mode = 2

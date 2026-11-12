@@ -49,6 +49,7 @@ const SUPPORTED_MAP_MODS := SongDetails.SUPPORTED_MAP_MODS
 @onready var width_control := %Width as OptionButton
 @onready var speed_control := %Speed as OptionButton
 @onready var reset_button := %Reset_Button as Button
+@onready var seated_play_control := %SeatedPlay as CheckButton
 
 @onready var song_preview := $song_prev as AudioStreamPlayer
 var song_preview_transition_time := 1.0
@@ -540,6 +541,11 @@ func _ready() -> void:
 	Settings.changed.connect(on_settings_changed)
 
 	_update_mod_controls()
+	seated_play_control.set_pressed_no_signal(Settings.seated_play)
+	seated_play_control.toggled.connect(func(value: bool) -> void:
+		Settings.seated_play = value
+		Settings.save())
+	(%CalibrateHeight as Button).pressed.connect(func() -> void: beepsaber_game.recenter())
 	_characteristic_group.allow_unpress = false
 	_difficulty_group.allow_unpress = false
 	song_card.favorite_toggled.connect(_on_card_favorite_toggled)
@@ -561,6 +567,9 @@ func _ready() -> void:
 
 func on_settings_changed(key: StringName) -> void:
 	match key:
+		&"seated_play":
+			seated_play_control.set_pressed_no_signal(Settings.seated_play)
+			_redraw()
 		&"music_speed":
 			song_preview.pitch_scale = Settings.music_speed / 100.
 

@@ -31,6 +31,14 @@ local song twice) to put it in the center **Now Playing** panel. Choose its
 characteristic, difficulty and modifiers there, then press **Play**. BeatSaver's
 **Download** button becomes **Load** when the download finishes.
 
+For a chair or couch, enable **Seated play** in Now Playing, sit comfortably and
+look forward, then press **Center & height**. This calibrates a virtual standing
+eye height and places the menus relative to your eyes. Calibration is a snapshot;
+ducking during a song still moves your head normally. Recalibrate when changing
+seats or tracking origins. Settings also has a fine height adjustment; positive
+values make the notes lower to reach. The headset's boundary setup alone does not
+select this game's seated mode.
+
 ## Map mods
 * **Chroma**: per-note, bomb, wall and lighting event colors (`_color` / `color` custom data).
   Per-light-ID effects (`_lightID`) and gradients are not supported. Turn on "Ignore Map's Colors" in the settings to ignore them.

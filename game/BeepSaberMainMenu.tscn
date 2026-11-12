@@ -215,6 +215,28 @@ theme_override_font_sizes/font_size = 24
 fit_to_longest_item = false
 text_overrun_behavior = 3
 
+[node name="ComfortRow" type="HBoxContainer" parent="Layout/Columns/Right"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SeatedPlay" type="CheckButton" parent="Layout/Columns/Right/ComfortRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Seated play"
+tooltip_text = "Calibrate a comfortable virtual eye height for playing from a chair or couch."
+
+[node name="CalibrateHeight" type="Button" parent="Layout/Columns/Right/ComfortRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Center & height"
+tooltip_text = "Sit or stand comfortably and look forward, then center the menus and calibrate seated height."
+
 [node name="Spacer" type="Control" parent="Layout/Columns/Right"]
 layout_mode = 2
 size_flags_vertical = 3

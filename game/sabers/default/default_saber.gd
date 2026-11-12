@@ -2,6 +2,7 @@ extends Node3D
 class_name DefaultSaber
 
 var is_extended := false
+var _hilt: SaberHilt
 
 @onready var _anim := $AnimationPlayer as AnimationPlayer
 @onready var light_mesh := $LightSaber_Mesh as MeshInstance3D
@@ -11,11 +12,16 @@ var is_extended := false
 @onready var hitsound := $hitsound as AudioStreamPlayer3D
 
 func _ready() -> void:
+	_hilt = preload("res://game/sabers/default/SaberHilt.gd").new()
+	_hilt.name = &"HiltDetail"
+	add_child(_hilt)
+	$Hilt_Mesh.hide()
 	quickhide()
 
 func set_color(color: Color) -> void:
 	_mat.set_shader_parameter(&"color", color)
 	tail.set_color(color)
+	if _hilt != null: _hilt.set_color(color)
 
 func set_thickness(value: float) -> void:
 	light_mesh.scale.x = value

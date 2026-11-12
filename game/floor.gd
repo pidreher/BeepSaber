@@ -19,6 +19,9 @@ const mixed_reality_burn_alpha := 0.3
 var is_disabled := false
 
 func _ready() -> void:
+	var stage := preload("res://game/StageGeometry.gd").new()
+	stage.name = &"StageGeometry"
+	add_child(stage)
 	var material := ($Node3D/cutFloor as MeshInstance3D).material_override as StandardMaterial3D
 	sub_viewport.transparent_bg = Settings.mixed_reality
 	material.albedo_texture = sub_viewport.get_texture()

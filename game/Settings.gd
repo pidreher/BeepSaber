@@ -136,6 +136,10 @@ var player_height_offset: float:
 	set(value):
 		player_height_offset = value
 		set_and_emit(&"player_height_offset", value)
+var seated_play: bool:
+	set(value):
+		seated_play = value
+		set_and_emit(&"seated_play", value)
 var audio_master: float:
 	set(value):
 		audio_master = value
@@ -252,6 +256,7 @@ var default_values = {
 	right_saber_offset_rot = Vector3.ZERO,
 	disable_map_color = false,
 	player_height_offset = 0.0,
+	seated_play = false,
 	audio_master = 0.8,
 	audio_music = 0.8,
 	music_speed = 100,

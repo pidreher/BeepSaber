@@ -18,6 +18,11 @@ var current_health := Constants.HEALTH_START
 var effects_audio: SaberEffectsAudio
 var cut_splashes: CubeCutSplash
 
+const COMFORT_EYE_HEIGHT := 1.75
+var _seated_height_lift := 0.0
+var _comfort_rest_heights := {}
+var _first_tracking_height_calibrated := false
+
 @onready var xr_origin := $XROrigin3D as XROrigin3D
 @onready var left_controller := $XROrigin3D/LeftController as BeepSaberController
 @onready var right_controller := $XROrigin3D/RightController as BeepSaberController
@@ -323,7 +328,7 @@ func _ready() -> void:
 		right_controller
 	)
 	
-	vr.pose_recentered.connect(recenter)
+	vr.pose_recentered.connect(_on_tracking_recentered)
 
 	debug_info_label.visible = Settings.show_debug_info
 	set_colors_from_settings()
@@ -331,6 +336,11 @@ func _ready() -> void:
 	
 	if not vr.inVR:
 		xr_origin.add_child(preload("res://OQ_Toolkit/OQ_ARVROrigin/Feature_VRSimulator.tscn").instantiate())
+	_cache_comfort_layout()
+	if vr.inVR:
+		vr.xr_interface.session_focussed.connect(_on_first_tracking_focus)
+		if vr.xr_interface.get_session_state() == OpenXRInterface.SESSION_STATE_FOCUSED:
+			_on_first_tracking_focus()
 	
 	UI_AudioEngine.attach_children(highscore_keyboard)
 	highscore_keyboard.text_input_cancel.connect(func() -> void:
@@ -391,7 +401,9 @@ func on_settings_changed(key: StringName) -> void:
 		&"glare":
 			($WorldEnvironment as WorldEnvironment).environment.glow_enabled = Settings.glare
 		&"player_height_offset":
-			xr_origin.transform.origin.y = Settings.player_height_offset
+			_apply_player_comfort(false)
+		&"seated_play":
+			recenter()
 
 func set_colors_from_settings() -> void:
 	update_left_color(Settings.color_left)
@@ -611,6 +623,48 @@ func recenter():
 	var xr_camera := $XROrigin3D/XRCamera3D as XRCamera3D
 	xr_origin.rotation.y -= xr_camera.global_rotation.y
 	xr_origin.position -= (xr_camera.global_position * Vector3(1,0,1)) - Vector3(0,0,1)
+	_apply_player_comfort(true)
+
+func _cache_comfort_layout() -> void:
+	for node: Node3D in [main_menu, library_canvas, highscore_canvas, settings_canvas,
+		pause_menu, endscore, name_selector_canvas, highscore_keyboard, online_search_keyboard,
+		map_source_dialogs, multiplier_label, point_label, percent_indicator, pause_countdown]:
+		_comfort_rest_heights[node] = node.position.y
+
+func _apply_player_comfort(calibrate_height: bool) -> void:
+	var camera := $XROrigin3D/XRCamera3D as XRCamera3D
+	# Measure in tracking space, before applying our own offset. Repeated
+	# calibration must not accumulate lift. Snapshot only: ducking stays natural.
+	var tracked_height := camera.position.y
+	if not Settings.seated_play:
+		_seated_height_lift = 0.0
+	elif calibrate_height and tracked_height > 0.25:
+		_seated_height_lift = clampf(COMFORT_EYE_HEIGHT - tracked_height, -0.6, 1.4)
+	xr_origin.position.y = _seated_height_lift + Settings.player_height_offset
+	var eye_height := camera.global_position.y
+	if tracked_height <= 0.25: eye_height = COMFORT_EYE_HEIGHT
+	var shift := eye_height - COMFORT_EYE_HEIGHT
+	for node: Node3D in _comfort_rest_heights:
+		node.position.y = float(_comfort_rest_heights[node]) + shift
+	# The floor-level keyboard shelf is too low when the seated origin is lifted.
+	if Settings.seated_play: online_search_keyboard.position.y += 0.4
+	if calibrate_height:
+		vr.log_info("Height calibrated: seated=%s tracked=%.2fm lift=%.2fm adjustment=%.2fm" % [
+			Settings.seated_play, tracked_height, _seated_height_lift, Settings.player_height_offset])
+
+func _on_first_tracking_focus() -> void:
+	if _first_tracking_height_calibrated: return
+	_first_tracking_height_calibrated = true
+	# The startup scene pose is a placeholder until OpenXR has supplied views.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	recenter()
+
+func _on_tracking_recentered() -> void:
+	# Apply the new poses after the runtime's reference-space change takes effect.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	recenter()
 
 func _set_hand(right: bool, hand: bool) -> void:
 	var angle_offset := -45. if hand else 0.
