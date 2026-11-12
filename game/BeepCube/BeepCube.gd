@@ -17,6 +17,7 @@ var is_dot: bool
 # reuse it when we create the cut cube pieces
 var _mesh: Mesh
 var _mat: ShaderMaterial
+var _cut_color := Color.WHITE
 @export var min_speed := 0.5
 
 var piece_left : CutPiece = null
@@ -45,6 +46,7 @@ func spawn(note_info: ColorNoteInfo, current_beat: float) -> void:
 	var color := Map.color_left if note_info.color == 0 else Map.color_right
 	if note_info.custom_color.a > 0: # Chroma
 		color = note_info.custom_color
+	_cut_color = color
 	speed = Constants.BEAT_DISTANCE * Map.current_info.beats_per_minute * 0.016666666666666667
 	beat = note_info.beat
 	which_saber = note_info.color
@@ -135,6 +137,7 @@ func set_arc_tail() -> void:
 	arc_tail = true
 
 func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController) -> void:
+	var world_cut_speed := cut_speed
 	# compute the angle between the cube orientation and the cut direction
 	cut_speed = cut_speed.rotated(Vector3(0,1,0), -rotation.y)
 	var cut_direction_xy := -Vector3(cut_speed.x, cut_speed.y, 0.0).normalized()
@@ -159,6 +162,9 @@ func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: Be
 	
 	# reset the movement tracking volume for the next cut
 	controller.reset_movement_aabb()
+	var game := GlobalReferences.main_game_scene
+	if game != null:
+		game.cut_splashes.splash(cut_plane.project(global_position), world_cut_speed, _cut_color)
 	
 	hide_cube()
 	if Settings.cube_cuts_falloff:

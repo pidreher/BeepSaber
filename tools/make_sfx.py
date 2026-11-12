@@ -5,10 +5,12 @@
 """Synthesizes the game's sound effects (original sounds, no samples used).
 
     uv run tools/make_sfx.py
+    uv run tools/make_sfx.py --only arc_loop clash_loop saber_clash
 
 Writes 16-bit mono WAVs to game/data/sfx/.
 """
 from pathlib import Path
+import argparse
 
 import numpy as np
 from scipy.io import wavfile
@@ -103,6 +105,56 @@ def fail() -> np.ndarray:
     return finish(dry + 0.3 * wet, drive=1.2, fade=0.05)
 
 
+def periodic_noise(seconds: float, lo: float, hi: float, seed: int) -> np.ndarray:
+    """Band-limited noise with a seamless loop boundary."""
+    n = int(SR * seconds)
+    frequencies = np.fft.rfftfreq(n, 1 / SR)
+    spectrum = np.zeros(frequencies.size, dtype=complex)
+    selected = (frequencies >= lo) & (frequencies <= hi)
+    phases = np.random.default_rng(seed).uniform(0, 2 * np.pi, selected.sum())
+    spectrum[selected] = np.exp(1j * phases)
+    x = np.fft.irfft(spectrum, n)
+    return x / np.max(np.abs(x))
+
+
+def arc_loop() -> np.ndarray:
+    """Deep electrical flow. The game applies the shared haptic pulse envelope."""
+    t = t_axis(1.0)
+    bass = np.sin(2 * np.pi * 85 * t)
+    body = 0.32 * np.sin(2 * np.pi * 170 * t) + 0.15 * np.sin(2 * np.pi * 255 * t)
+    fizz = periodic_noise(1.0, 650, 2400, 9021) * (0.75 + 0.25 * np.sin(2 * np.pi * 5 * t))
+    x = bass + body + 0.24 * fizz
+    return x / np.max(np.abs(x)) * 0.8
+
+
+def clash_loop() -> np.ndarray:
+    """A restrained crackling sizzle while two blades remain pressed together."""
+    t = t_axis(1.0)
+    crackle = periodic_noise(1.0, 900, 4200, 9022)
+    buzz = np.sin(2 * np.pi * 110 * t + 0.45 * np.sin(2 * np.pi * 55 * t))
+    x = 0.48 * buzz + 0.5 * crackle * (0.7 + 0.3 * np.sin(2 * np.pi * 13 * t))
+    return x / np.max(np.abs(x)) * 0.75
+
+
+def saber_clash() -> np.ndarray:
+    """A short electrical crack, weighty impact and dying resonant zing."""
+    t = t_axis(0.46)
+    noise = np.random.default_rng(9023).standard_normal(t.size)
+    crack = band(noise, 1800, 6500) * np.exp(-t / 0.018)
+    thump = glide_sine(60 + 110 * np.exp(-t / 0.018)) * np.exp(-t / 0.065)
+    ring = sum(a * np.sin(2 * np.pi * f * t) * np.exp(-t / d)
+               for f, a, d in [(280, 0.34, 0.12), (730, 0.24, 0.09), (1230, 0.12, 0.065)])
+    zap = glide_sine(210 + 1400 * np.exp(-t / 0.032)) * np.exp(-t / 0.055)
+    x = (1.2 * crack + 0.7 * thump + ring + 0.24 * zap) * (1 - np.exp(-t / 0.0008))
+    return finish(x, drive=1.35, fade=0.025)
+
+
 if __name__ == "__main__":
-    save("hit.wav", hit())
-    save("fail.wav", fail())
+    generators = dict(hit=hit, fail=fail, arc_loop=arc_loop,
+                      clash_loop=clash_loop, saber_clash=saber_clash)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--only", nargs="+", choices=generators)
+    args = parser.parse_args()
+    for name, generate in generators.items():
+        if args.only is None or name in args.only:
+            save(name + ".wav", generate())

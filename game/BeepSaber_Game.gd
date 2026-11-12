@@ -15,6 +15,8 @@ var gamestate_playing := GameStatePlaying.new()
 var gamestate_settings := GameStateSettings.new()
 var gamestate: GameState = gamestate_bootup
 var current_health := Constants.HEALTH_START
+var effects_audio: SaberEffectsAudio
+var cut_splashes: CubeCutSplash
 
 @onready var xr_origin := $XROrigin3D as XROrigin3D
 @onready var left_controller := $XROrigin3D/LeftController as BeepSaberController
@@ -183,6 +185,9 @@ func _reset_fail_effect() -> void:
 # This function will transitioning the game from it's current state into
 # the provided 'next_state'.
 func _transition_game_state(next_state: GameState) -> void:
+	effects_audio.stop_all()
+	if next_state != gamestate_playing and next_state != gamestate_paused:
+		cut_splashes.clear()
 	gamestate = next_state
 	gamestate._ready(self)
 
@@ -218,14 +223,28 @@ func _submit_highscore(player_name: String) -> void:
 # reports them touching each other; check the distance between the blades.
 const SABER_CLASH_DISTANCE := 0.05
 var _saber_clash_active := false
+var _clash_last_relative := Vector3.ZERO
+var _clash_motion_ready := false
 
 func _update_saber_clash() -> void:
 	var touching := false
+	var point := Vector3.ZERO
+	var impact_strength := 0.4
 	if left_saber.is_extended() and right_saber.is_extended():
 		var l := _saber_blade(left_saber)
 		var r := _saber_blade(right_saber)
 		var closest := Geometry3D.get_closest_points_between_segments(l[0], l[1], r[0], r[1])
 		touching = closest[0].distance_to(closest[1]) < SABER_CLASH_DISTANCE
+		point = (closest[0] + closest[1]) * 0.5
+		var relative := l[1] - r[1]
+		if _clash_motion_ready:
+			var speed := relative.distance_to(_clash_last_relative) / maxf(get_physics_process_delta_time(), 0.001)
+			impact_strength = clampf(speed / 8.0, 0.4, 1.0)
+		_clash_last_relative = relative
+		_clash_motion_ready = true
+	else:
+		_clash_motion_ready = false
+	effects_audio.set_clash(touching and gamestate != gamestate_paused and not _failing, point, impact_strength)
 	if touching:
 		# strong hit when the blades meet, then a lighter buzz while they stay in contact
 		var first_contact := not _saber_clash_active
@@ -286,6 +305,10 @@ func _enter_tree() -> void:
 	Settings.changed.connect(on_settings_changed)
 
 func _ready() -> void:
+	effects_audio = SaberEffectsAudio.new()
+	add_child(effects_audio)
+	cut_splashes = CubeCutSplash.new()
+	add_child(cut_splashes)
 	# pre-allocate scenes in our scene pools
 	GlobalReferences.cube_pool = $BeepCubePool
 	GlobalReferences.link_pool = $ChainLinkPool
@@ -396,6 +419,7 @@ func update_right_color(color: Color) -> void:
 	standing_ground.update_right_color(color)
 
 func _clear_track() -> void:
+	cut_splashes.clear()
 	for c in track.get_children():
 		if c.has_method("clear_from_track"):
 			c.clear_from_track()

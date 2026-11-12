@@ -88,3 +88,5 @@ func _update_haptics() -> void:
 	if distance > ARC_HAPTIC_START_DISTANCE: return
 	var closeness := 1.0 - clampf((distance - ARC_HAPTIC_FULL_DISTANCE) / (ARC_HAPTIC_START_DISTANCE - ARC_HAPTIC_FULL_DISTANCE), 0.0, 1.0)
 	controller.arc_rumble(lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness))
+	game.effects_audio.request_arc(arc_info.color, lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness),
+		base.lerp(tip, 0.65), controller._arc_time)
