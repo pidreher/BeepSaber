@@ -7,3 +7,6 @@ src_data
 .godot/
 android/build/*
 /addons/godotopenxrvendors
+
+# local APK builds
+/build/
