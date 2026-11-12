@@ -644,11 +644,11 @@ binding_path = "/user/hand/right/input/system/click"
 
 [sub_resource type="OpenXRIPBinding" id="OpenXRIPBinding_gvgeq"]
 action = SubResource("OpenXRAction_jt1uy")
-binding_path = "/user/hand/left/input/back/click"
+binding_path = "/user/hand/left/input/menu/click"
 
 [sub_resource type="OpenXRIPBinding" id="OpenXRIPBinding_i0s8c"]
 action = SubResource("OpenXRAction_jt1uy")
-binding_path = "/user/hand/right/input/back/click"
+binding_path = "/user/hand/right/input/menu/click"
 
 [sub_resource type="OpenXRIPBinding" id="OpenXRIPBinding_ynetq"]
 action = SubResource("OpenXRAction_fk4kp")

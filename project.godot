@@ -148,6 +148,7 @@ common/physics_fps=72
 [rendering]
 
 renderer/rendering_method="mobile"
+renderer/rendering_method.pico="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 shading/overrides/force_lambert_over_burley=true
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)
