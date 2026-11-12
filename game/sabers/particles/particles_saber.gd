@@ -16,8 +16,8 @@ func _process(_delta: float) -> void:
 		#Particles.lifetime = max(0.1, 2-(20*speed))
 	last_tip_pos = current_tip_pos
 
-func hit(time_offset: float) -> void:
-	super(time_offset)
+func hit(time_offset: float, strength := 1.0) -> void:
+	super(time_offset, strength)
 	hitsound.pitch_scale = randf_range(0.9,1.1)
 
 func set_thickness(_value: float) -> void: #ignore set thinkness on this saber

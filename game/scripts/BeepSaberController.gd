@@ -69,8 +69,17 @@ func reset_movement_aabb() -> void:
 var _is_simple_rumbling := false
 var _rumble_duration_remaining := 0.0
 
+var _rumble_intensity := 0.0
+
+# like simple_rumble, but only replaces a running rumble if it is not stronger
+# (lets continuous effects update every frame without cutting off hit pulses)
+func rumble_at_least(intensity: float, duration: float) -> void:
+	if not _is_simple_rumbling or intensity >= _rumble_intensity:
+		simple_rumble(intensity, duration)
+
 func simple_rumble(intensity: float, duration: float) -> void:
 	_rumble_duration_remaining = duration;
+	_rumble_intensity = intensity
 	_is_simple_rumbling = true
 	# a zero amplitude pulse would only cut other vibrations short
 	if intensity > 0.0:

@@ -230,11 +230,14 @@ func _handle_area_collided(area: Area3D) -> void:
 		(note.beat/Map.current_info.beats_per_minute * 60.0)-
 		song_player_ref.get_playback_position()
 	)
-	saber_visual.hit(time_offset)
-	controller.simple_rumble(1.0, 0.09)
+	var controller_speed: Vector3 = (saber_end - saber_end_past) / last_dt
+	# faster swings feel (and sound) stronger: ~1.5 m/s tip speed is a soft tap,
+	# ~9 m/s a full swing
+	var hit_strength := clampf((controller_speed.length() - 1.5) / 7.5, 0.0, 1.0)
+	saber_visual.hit(time_offset, hit_strength)
+	controller.simple_rumble(lerpf(0.35, 1.0, hit_strength), lerpf(0.05, 0.13, hit_strength))
 	
 	var o := controller.global_transform.origin
-	var controller_speed: Vector3 = (saber_end - saber_end_past) / last_dt
 	const BEAT_DISTANCE := 4.0
 	var cutplane := Plane(o, saber_end, saber_end_past + Vector3(0, 0, BEAT_DISTANCE * Map.current_info.beats_per_minute * last_dt / 30)) # Account for relative position to track speed
 	note.cut(self, controller_speed, cutplane, controller)

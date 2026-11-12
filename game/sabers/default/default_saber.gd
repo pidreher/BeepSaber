@@ -49,9 +49,10 @@ func quickhide() -> void:
 	_anim.play(&"QuickHide")
 	is_extended = false
 
-func hit(time_offset: float) -> void:
+func hit(time_offset: float, strength := 1.0) -> void:
 	# a little variation so rapid hits don't sound like a machine gun
 	hitsound.pitch_scale = randf_range(0.93, 1.07)
+	hitsound.volume_db = lerpf(-9.0, 2.0, strength)
 	if time_offset>0.2 or time_offset<-0.05:
 		hitsound.play()
 	else:

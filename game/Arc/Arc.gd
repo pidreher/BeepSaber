@@ -16,9 +16,12 @@ var speed: float
 var despawn_z: float
 var _magnet := false
 
-# while the saber follows an active arc the controller vibrates lightly
-const ARC_HAPTIC_DISTANCE := 0.3
-const ARC_HAPTIC_STRENGTH := 0.4
+# while the saber follows an active arc the controller vibrates; it starts
+# softly when the saber gets near the arc and ramps up to full strength on it
+const ARC_HAPTIC_START_DISTANCE := 0.7
+const ARC_HAPTIC_FULL_DISTANCE := 0.06
+const ARC_HAPTIC_MIN := 0.15
+const ARC_HAPTIC_MAX := 1.0
 
 func spawn(info: ArcInfo, current_beat: float, _activator_cube: BeepCube = null) -> void:
 	arc_info = info
@@ -74,13 +77,14 @@ func _update_haptics() -> void:
 	if game == null: return
 	var saber := game.right_saber if arc_info.color == 1 else game.left_saber
 	var controller := game.right_controller if arc_info.color == 1 else game.left_controller
-	# don't override stronger rumbles (e.g. from cutting a cube)
-	if not saber.is_extended() or controller.is_simple_rumbling(): return
+	if not saber.is_extended(): return
 	var path := $Path3D as Path3D
 	var base := saber.global_transform.origin
 	var tip := saber.saber_visual.tip.global_transform.origin
-	for t in [1.0, 0.75, 0.5]:
+	var distance := INF
+	for t in [1.0, 0.8, 0.6, 0.4]:
 		var p := path.to_local(base.lerp(tip, t))
-		if path.curve.get_closest_point(p).distance_to(p) < ARC_HAPTIC_DISTANCE:
-			controller.simple_rumble(ARC_HAPTIC_STRENGTH, 0.05)
-			return
+		distance = minf(distance, path.curve.get_closest_point(p).distance_to(p))
+	if distance > ARC_HAPTIC_START_DISTANCE: return
+	var closeness := 1.0 - clampf((distance - ARC_HAPTIC_FULL_DISTANCE) / (ARC_HAPTIC_START_DISTANCE - ARC_HAPTIC_FULL_DISTANCE), 0.0, 1.0)
+	controller.rumble_at_least(lerpf(ARC_HAPTIC_MIN, ARC_HAPTIC_MAX, closeness * closeness), 0.05)
