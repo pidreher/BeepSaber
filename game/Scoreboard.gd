@@ -105,6 +105,21 @@ func note_cut(saber: LightSaber, position: Vector3, _rotation: float, beat_accur
 	else:
 		bad_cut(position, _rotation, "bad angle")
 
+const MISS_SOUND := preload("res://game/data/sfx/miss.wav")
+var _miss_player: AudioStreamPlayer
+
+# A note that passes the player plays a soft, low whiff.
+func _play_miss_sound() -> void:
+	if _miss_player == null:
+		_miss_player = AudioStreamPlayer.new()
+		_miss_player.stream = MISS_SOUND
+		_miss_player.bus = &"SFX"
+		_miss_player.volume_db = -6.0
+		_miss_player.max_polyphony = 3
+		add_child(_miss_player)
+	_miss_player.pitch_scale = randf_range(0.95, 1.05)
+	_miss_player.play()
+
 func bad_cut(position: Vector3, _rotation: float, description: String) -> void:
 	if description == "bomb":
 		reset_combo(false)
@@ -113,6 +128,7 @@ func bad_cut(position: Vector3, _rotation: float, description: String) -> void:
 		reset_combo(true)
 		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_MISS)
 		if description == "miss":
+			_play_miss_sound()
 			description = ""
 	else:
 		reset_combo(true)

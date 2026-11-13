@@ -176,8 +176,31 @@ def clash_loop() -> np.ndarray:
     return x / np.max(np.abs(x)) * 0.75
 
 
+def bad_cut() -> np.ndarray:
+    """Wrong-saber cut: a short dull thud and a harsh, beating buzz around 1-2 kHz,
+    clearly different from the bright crack and deep thump of a good cut."""
+    t = t_axis(0.45)
+    attack = 1 - np.exp(-t / 0.004)
+    # two detuned square-ish tones beat against each other
+    tones = sum(np.tanh(3 * np.sin(2 * np.pi * f * t)) for f in (1010.0, 1072.0, 1490.0))
+    buzz = band(tones, 700, 2600) * attack * np.exp(-t / 0.12)
+    thud = np.sin(2 * np.pi * 55 * t) * attack * np.exp(-t / 0.05)
+    x = 0.55 * buzz + 0.6 * thud
+    return finish(x, drive=1.6, fade=0.04)
+
+
+def miss() -> np.ndarray:
+    """Missed note passing by: a soft, falling low whiff."""
+    t = t_axis(0.35)
+    attack = 1 - np.exp(-t / 0.02)
+    tone = glide_sine(110 + 190 * np.exp(-t / 0.08)) * attack * np.exp(-t / 0.11)
+    air = band(rng.standard_normal(t.size), 300, 1500) * attack * np.exp(-t / 0.06)
+    x = 0.8 * tone + 0.25 * air
+    return finish(x, drive=1.2, fade=0.05)
+
+
 if __name__ == "__main__":
-    generators = dict(hit=hit, cut=cut, fail=fail, arc_loop=arc_loop,
+    generators = dict(hit=hit, cut=cut, bad_cut=bad_cut, miss=miss, fail=fail, arc_loop=arc_loop,
                       clash_loop=clash_loop)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--only", nargs="+", choices=generators)

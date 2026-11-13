@@ -262,7 +262,10 @@ func _handle_area_collided(area: Area3D) -> void:
 	# ~9 m/s a full swing
 	# The cut sound is silent below 1.5 m/s tip speed and full from 4 m/s.
 	var hit_strength := smoothstep(1.5, 4.0, controller_speed.length())
-	saber_visual.hit(time_offset, hit_strength)
+	# A note cut with the wrong saber gets its own sound instead of the cut sound.
+	var wrong_saber: bool = ("which_saber" in note and note.get(&"which_saber") != type
+		and not Map.one_saber and Settings.handedness == 0 and not note is Bomb)
+	saber_visual.hit(time_offset, hit_strength, wrong_saber)
 	# Every cut gets the same full-strength 0.13 s pulse.
 	controller.simple_rumble(1.0, 0.13)
 	

@@ -58,7 +58,26 @@ func quickhide() -> void:
 	_anim.play(&"QuickHide")
 	is_extended = false
 
-func hit(time_offset: float, strength := 1.0) -> void:
+const BAD_CUT_SOUND := preload("res://game/data/sfx/bad_cut.wav")
+var _bad_cut_player: AudioStreamPlayer3D
+
+# A wrong-saber cut plays the bad cut sound right away, at full volume.
+func _play_bad_cut() -> void:
+	if _bad_cut_player == null:
+		_bad_cut_player = AudioStreamPlayer3D.new()
+		_bad_cut_player.stream = BAD_CUT_SOUND
+		_bad_cut_player.bus = hitsound.bus
+		_bad_cut_player.attenuation_model = hitsound.attenuation_model
+		_bad_cut_player.volume_db = -3.0
+		hitsound.add_sibling(_bad_cut_player)
+		_bad_cut_player.position = hitsound.position
+	_bad_cut_player.pitch_scale = randf_range(0.97, 1.03)
+	_bad_cut_player.play()
+
+func hit(time_offset: float, strength := 1.0, wrong_saber := false) -> void:
+	if wrong_saber:
+		_play_bad_cut()
+		return
 	# a little variation so rapid hits don't sound like a machine gun
 	hitsound.pitch_scale = randf_range(0.93, 1.07)
 	if strength < 0.02: return
