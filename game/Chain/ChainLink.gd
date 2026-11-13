@@ -134,6 +134,10 @@ func cut(saber: LightSaber, _cut_speed: Vector3, cut_plane: Plane, _controller: 
 	else:
 		release()# release now instead of waiting for cut pieces to die off
 
+# Chain links only need the right saber (no direction or speed check).
+func is_bad_cut(saber_type: int, _cut_speed: Vector3) -> bool:
+	return not (saber_type == which_saber or Map.one_saber or Settings.handedness != 0)
+
 func on_miss() -> void:
 	Scoreboard.bad_cut(transform.origin, lane_rotation, "chain miss")
 	hide_cube()

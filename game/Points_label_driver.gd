@@ -78,13 +78,13 @@ func _refresh_song() -> void:
 var _miss_indicators: Array[MissIndicator] = []
 var _next_miss := 0
 
-func _show_miss(at: Vector3) -> void:
+func _show_miss(at: Vector3, text := "MISS") -> void:
 	if _miss_indicators.is_empty():
 		for i in 4:
 			var indicator := MissIndicator.new()
 			add_child(indicator)
 			_miss_indicators.append(indicator)
-	_miss_indicators[_next_miss].show_miss(at)
+	_miss_indicators[_next_miss].show_miss(at, text)
 	_next_miss = (_next_miss + 1) % _miss_indicators.size()
 
 func show_points(_position: Vector3, _rotation: float, value: String) -> void:
@@ -92,6 +92,12 @@ func show_points(_position: Vector3, _rotation: float, value: String) -> void:
 		value = "x"
 	if value == "x":
 		_show_miss(_position)
+		return
+	if value == "bad":
+		_show_miss(_position, "BAD CUT")
+		return
+	if value == "bomb":
+		_show_miss(_position, "BOMB")
 		return
 	var color := Color(1,0,0) if value == "x" else Color(1,1,1)
 	points_label[current_point_label].call(&"show_points", _position, _rotation, value, color)

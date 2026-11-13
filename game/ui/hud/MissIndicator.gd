@@ -1,7 +1,7 @@
 extends Node3D
 class_name MissIndicator
 
-# A large red "MISS" that pops up where a note was missed or cut with the wrong saber,
+# A large red "MISS" (or "BAD CUT") that pops up where a note was missed or badly cut,
 # rises a little and fades out. It is drawn over everything so it is never hidden.
 
 const LIFETIME := 0.9
@@ -33,7 +33,8 @@ func _ready() -> void:
 	add_child(_instance)
 	visible = false
 
-func show_miss(at: Vector3) -> void:
+func show_miss(at: Vector3, text := "MISS") -> void:
+	_mesh.text = text
 	at.z = clampf(at.z, FARTHEST_Z, NEAREST_Z)
 	at.y = clampf(at.y, 0.6, 2.2)
 	global_position = at

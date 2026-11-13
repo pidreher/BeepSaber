@@ -39,6 +39,11 @@ func set_collision_disabled(value: bool) -> void:
 func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController) -> void:
 	return
 
+# overridden by cubes and chain links: true if this cut would be a bad cut
+@warning_ignore("unused_parameter")
+func is_bad_cut(saber_type: int, cut_speed: Vector3) -> bool:
+	return false
+
 # this too
 func on_miss() -> void:
 	return

@@ -167,6 +167,20 @@ func set_arc_head() -> void:
 func set_arc_tail() -> void:
 	arc_tail = true
 
+# A cut only counts as good with the right saber, a blade speed above 2 m/s and, for
+# arrows, a swing within 60 degrees of the arrow direction. Anything else is a bad cut.
+const MIN_CUT_SPEED := 2.0
+const MIN_CUT_DIRECTION_DOT := 0.5 # cos(60 deg)
+
+func _is_right_saber(saber_type: int) -> bool:
+	return saber_type == which_saber or Map.one_saber or Settings.handedness != 0
+
+func is_bad_cut(saber_type: int, cut_speed: Vector3) -> bool:
+	if not _is_right_saber(saber_type) or cut_speed.length() <= MIN_CUT_SPEED: return true
+	if is_dot or not Settings.arrows_enabled: return false
+	var cut_direction := -cut_speed.slide(_lane_basis.z).normalized()
+	return global_transform.basis.orthonormalized().y.dot(cut_direction) < MIN_CUT_DIRECTION_DOT
+
 func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController) -> void:
 	var world_cut_speed := cut_speed
 	# compute the angle between the cube orientation and the cut direction
@@ -175,7 +189,13 @@ func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: Be
 	var cut_distance := cut_plane.distance_to(global_transform.origin)
 	var distance_scale := 100./Settings.block_size
 	
-	if saber.type == which_saber or Map.one_saber or Settings.handedness != 0:
+	if not _is_right_saber(saber.type):
+		Scoreboard.bad_cut(transform.origin, lane_rotation, "wrong saber")
+		cutted.emit(false)
+	elif is_bad_cut(saber.type, cut_speed):
+		Scoreboard.bad_cut(transform.origin, lane_rotation, "bad cut")
+		cutted.emit(false)
+	else:
 		var cut_angle_accuracy := clampf((base_cut_angle_accuracy-0.7)/0.3, 0.0, 1.0)
 		if is_dot or not Settings.arrows_enabled: #ignore angle if is a dot
 			cut_angle_accuracy = 1.0
@@ -189,9 +209,6 @@ func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: Be
 		var beat_accuracy := clampf((1.0 - seconds_off / BEAT_ACCURACY_ZERO_AT) / 0.5, 0.0, 1.0)
 		Scoreboard.note_cut(saber, transform.origin, lane_rotation, beat_accuracy, cut_angle_accuracy, cut_distance_accuracy, travel_distance_factor, arc_head, arc_tail, chain_head)
 		cutted.emit(true)
-	else:
-		Scoreboard.bad_cut(transform.origin, lane_rotation, "wrong saber")
-		cutted.emit(false)
 	
 	# reset the movement tracking volume for the next cut
 	controller.reset_movement_aabb()

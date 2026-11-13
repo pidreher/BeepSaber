@@ -123,6 +123,7 @@ func _play_miss_sound() -> void:
 	_miss_player.play()
 
 func bad_cut(position: Vector3, _rotation: float, description: String) -> void:
+	var missed := description == "miss" or description == "chain miss"
 	if description == "bomb":
 		reset_combo(false)
 		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_BOMB)
@@ -143,4 +144,4 @@ func bad_cut(position: Vector3, _rotation: float, description: String) -> void:
 	else:
 		reset_combo(true)
 		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_BAD_CUT)
-	points_awarded.emit(position, _rotation, description if Settings.explain else "x")
+	points_awarded.emit(position, _rotation, description if Settings.explain else ("x" if missed else ("bomb" if description == "bomb" else "bad")))
