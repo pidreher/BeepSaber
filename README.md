@@ -9,7 +9,8 @@ This fork tries to improve the experience and make it more of it's own game inst
 This is a basic implementation of the beat saber game mechanic for VR using the [Godot Game Engine](https://godotengine.org/) and the [Godot Oculus Quest Toolkit](https://github.com/NeoSpark314/godot_oculus_quest_toolkit). The main objective of this project is to show how a VR game can be implemented using
 the Godot game engine.
 
-The main target platforms are the Meta Quest and Pico 4 / Pico 4 Ultra standalone headsets. It should also work with SteamVR or other PC OpenXR runtimes.
+The target platforms are Meta Quest and Pico 4 / Pico 4 Ultra standalone headsets,
+plus Windows and Linux PC VR through SteamVR / OpenXR.
 
 Originally this game was (and still is) a demo game as part of the Godot Oculus Quest Toolkit. To keep the demo implementation small
 this stand alone version was forked so that it can be changed and developed independent of the original demo.
@@ -47,6 +48,25 @@ select this game's seated mode.
 * **Noodle Extensions** and **Vivify** are *not* supported; such maps load but play like vanilla maps.
 
 The song info panel lists the mods a map requires or suggests and marks unsupported ones.
+
+# SteamVR (Windows and Linux)
+
+With Godot 4.6.3 and its export templates installed:
+
+```sh
+tools/build_pcvr.sh         # -> build/OpenSaberPlus-SteamVR-{linux,windows}.zip
+```
+
+Extract the ZIP for your PC, connect the headset to SteamVR, set SteamVR as the
+active OpenXR runtime in **SteamVR Settings > OpenXR**, and run the included
+**Launch-SteamVR** launcher. A Pico connects through PC streaming; the game runs
+on the PC. See [SteamVR setup, controls and troubleshooting](doc/steamvr.md).
+
+To launch from your Steam library, exit Steam and run
+`python3 tools/add_to_steam.py` (or `python3 Add-to-Steam.py` from an extracted
+bundle). Restart Steam and press **Play** on **Open Saber Plus**. The installer
+supports native Linux, Flatpak and Windows Steam and adds the game to the VR
+library. See [Steam library installation](doc/steamvr.md#add-to-your-steam-library).
 
 # Building for Android headsets (Pico 4, Quest)
 Everything can be done from the command line on Linux:

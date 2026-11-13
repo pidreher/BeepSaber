@@ -1,7 +1,6 @@
 extends Cuttable
 class_name Bomb
 
-@export var min_speed := 0.5
 @onready var collision_shape := $Area3D/CollisionShape3D as CollisionShape3D
 
 func set_collision_disabled(value: bool) -> void:
@@ -28,21 +27,21 @@ static func _chroma_material(color: Color) -> StandardMaterial3D:
 	return _chroma_materials[color]
 
 func spawn(info: BombInfo, current_beat: float) -> void:
-	speed = Constants.BEAT_DISTANCE * Map.current_info.beats_per_minute / 60.0
+	speed = Map.beat_distance * Map.current_info.beats_per_minute / 60.0
 	beat = info.beat
 	
 	var distance: float = info.beat - current_beat
 	
 	transform.origin.x = Settings.LANE_DISTANCE_X * float(info.line_index) + Settings.LANE_ZERO_X
-	transform.origin.y = Constants.LANE_DISTANCE_Y * float(info.line_layer) + Constants.LAYER_ZERO_Y
-	transform.origin.z = -distance * Constants.BEAT_DISTANCE
+	transform.origin.y = Constants.layer_y(float(info.line_layer))
+	transform.origin.z = -distance * Map.beat_distance
 	
 	add_lane_rotation(info.rotation)
+	configure_jump(float(info.line_layer))
+	start_fly_in(info.beat, current_beat)
 	
 	if info.custom_color.a > 0: # Chroma
 		($BombAnimation/Mesh/Icosphere as MeshInstance3D).material_override = _chroma_material(info.custom_color)
 	
-	var anim := $AnimationPlayer as AnimationPlayer
-	var anim_speed := Map.current_difficulty.note_jump_movement_speed / 9.0
-	anim.speed_scale = maxf(min_speed, anim_speed)
-	anim.play(&"Spawn")
+	# Bombs can spawn before entering the tree; keep their visible root aligned.
+	($BombAnimation as Node3D).transform = Transform3D.IDENTITY

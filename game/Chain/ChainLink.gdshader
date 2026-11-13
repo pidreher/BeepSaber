@@ -6,27 +6,16 @@ const float cut_white_margin = 0.04;
 
 uniform vec4 color : source_color;
 uniform bool cutted = false;
-uniform float cut_dist_from_center = 0.0;
-uniform float cut_angle = 0.0;
+uniform vec3 cut_plane_normal = vec3(1.0, 0.0, 0.0);
+uniform float cut_plane_dist = 0.0;
 uniform float cut_vanish = 0.0;
 
-// [firepal]TODO: Build matrix on CPU (I tried but couldn't')
-mat3 rotation3dZ(float angle) {
-	float s = sin(angle);
-	float c = cos(angle);
-
-	return mat3(
-		vec3(c, s, 0.0),
-		vec3(-s, c, 0.0),
-		vec3(0.0, 0.0, 1.0)
-	);
-}
-
 varying float cut_interp;
+varying vec3 object_position;
 void vertex() {
+	object_position = VERTEX;
 	if (cutted) {
-		float cut_line = cut_dist_from_center+(VERTEX*rotation3dZ(cut_angle)).x;
-		cut_interp = cut_line - cut_vanish;
+		cut_interp = dot(VERTEX, cut_plane_normal) - cut_plane_dist;
 	} else {
 		// not cut, ensure no discard later
 		cut_interp = 1.0;
@@ -34,6 +23,11 @@ void vertex() {
 }
 
 void fragment() {
+	if (cutted) {
+		vec3 cell = floor(object_position * 65.0);
+		float noise = fract(sin(dot(cell, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+		if (noise < smoothstep(0.12, 1.0, cut_vanish)) discard;
+	}
 	// Discard all pixels "in the cut"
 	if (cut_interp < 0.0) {
 		discard;
@@ -47,17 +41,15 @@ void fragment() {
 		float y_centered = UV.y - 0.25;
 		float dist_from_center_squared = x_centered * x_centered + y_centered * y_centered;
 		if (dist_from_center_squared <= 0.001) {
-			EMISSION = vec3(1.0);
+			EMISSION = cutted ? mix(color.rgb, vec3(1.0), 0.25) * (1.0 - cut_vanish) : vec3(1.0);
 		} else {
 			EMISSION = color.rgb * sub_emission_energy;
 			if (cutted){
-				// soft white margin
-				EMISSION += vec3(smoothstep(cut_white_margin+0.01,cut_white_margin,cut_interp));
-				// hard white margin
-				//EMISSION += vec3( float(cut_white_margin < cut_interp) );
+				// Colored light at the exposed edge fades with the body.
+				EMISSION += mix(color.rgb, vec3(1.0), 0.25) * (1.0 - smoothstep(0.0, cut_white_margin, cut_interp)) * 2.0 * (1.0 - cut_vanish);
 			}
 		}
 	} else {
-		EMISSION = vec3(1.0);
+		EMISSION = cutted ? mix(color.rgb, vec3(1.0), 0.25) * (1.0 - cut_vanish) : vec3(1.0);
 	}
 }

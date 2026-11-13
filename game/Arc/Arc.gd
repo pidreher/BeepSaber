@@ -14,6 +14,8 @@ var activator_cube: BeepCube
 
 var speed: float
 var despawn_z: float
+var _fly_time_left := 0.0
+var _fly_extra := 0.0
 var _magnet := false
 
 # while the saber follows an active arc the controller vibrates; it starts
@@ -32,7 +34,7 @@ func spawn(info: ArcInfo, current_beat: float, _activator_cube: BeepCube = null)
 		queue_free()
 		return
 	
-	speed = Constants.BEAT_DISTANCE * Map.current_info.beats_per_minute * 0.016666666666666667
+	speed = Map.beat_distance * Map.current_info.beats_per_minute * 0.016666666666666667
 	var path := $Path3D as Path3D
 	visual = $Path3D/Visual
 	visual.material_override = right_material if arc_info.color == 1 else left_material
@@ -43,12 +45,19 @@ func spawn(info: ArcInfo, current_beat: float, _activator_cube: BeepCube = null)
 		start_magnet()
 	
 	path.set_curve(info.curve)
-	despawn_z = Constants.MISS_Z - info.tail_pos.z - current_beat*Constants.BEAT_DISTANCE
+	despawn_z = Constants.MISS_Z - info.tail_pos.z - current_beat*Map.beat_distance
 	
 	path.set_curve(arc_info.curve)
 	# sets the origin of the tail at the tail point to use in the shader for a fade out effect
-	path.position =  info.tail_pos + Vector3(0,0,current_beat*Constants.BEAT_DISTANCE)
+	path.position =  info.tail_pos + Vector3(0,0,current_beat*Map.beat_distance)
 	rotation.y = -arc_info.head_rotation
+	_fly_extra = 0.0
+	_fly_time_left = Map.fly_in_time_left(info.head_beat, current_beat)
+	_set_fly_extra(Map.fly_in_extra_distance(_fly_time_left, speed))
+
+func _set_fly_extra(extra: float) -> void:
+	transform.origin -= transform.basis.z * (extra - _fly_extra)
+	_fly_extra = extra
 
 func _on_activator_cube_cutted(correct_saber: bool) -> void:
 	if activator_cube and activator_cube.cutted.is_connected(_on_activator_cube_cutted):
@@ -65,6 +74,9 @@ func start_magnet() -> void:
 func _process(delta: float) -> void:
 	if Scoreboard.paused or not is_visible_in_tree() or not Map.current_info: return
 	transform.origin += speed * delta * transform.basis.z
+	if _fly_time_left > 0.0:
+		_fly_time_left = maxf(_fly_time_left - delta, 0.0)
+		_set_fly_extra(Map.fly_in_extra_distance(_fly_time_left, speed))
 	if _magnet:
 		_update_haptics()
 	if transform.origin.dot(transform.basis.z) >= despawn_z:

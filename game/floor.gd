@@ -31,6 +31,9 @@ func _ready() -> void:
 		sub_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		is_disabled = true
 		
+func update_stage() -> void:
+	(get_node(^"StageGeometry") as StageGeometry).rebuild()
+
 func update_left_color(color: Color) -> void:
 	C_LEFT = color
 	burn_l.modulate = color*6
@@ -48,8 +51,9 @@ var right_is_out := false
 func burn_mark(pos:=Vector3(0,0,-50),type:=0) -> void:
 	if is_disabled:
 		return
+	# The burn surface is 3 m wide and 2 m deep at 256 px per metre.
 	var newpos := Vector2(
-		(pos.x+1)*256,
+		(pos.x+1.5)*256,
 		pos.z*256
 	)
 

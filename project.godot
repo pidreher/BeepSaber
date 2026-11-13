@@ -149,6 +149,8 @@ common/physics_fps=72
 
 renderer/rendering_method="mobile"
 renderer/rendering_method.pico="gl_compatibility"
+rendering_device/driver.windows="vulkan"
+textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
 shading/overrides/force_lambert_over_burley=true
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)
@@ -166,6 +168,18 @@ quality/depth/hdr=false
 
 [shader_globals]
 
+mirror_area_a={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+mirror_area_b={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+glow_fog_density={
+"type": "float",
+"value": 0.025
+}
 left_saber={
 "type": "vec3",
 "value": Vector3(-0.5, 0, 0)
@@ -178,9 +192,11 @@ right_saber={
 [xr]
 
 openxr/enabled=true
+openxr/default_action_map="res://openxr_action_map.tres"
 openxr/reference_space=2
 openxr/environment_blend_mode=0
 openxr/startup_alert=false
+openxr/startup_alert.pcvr=true
 openxr/extensions/hand_tracking=true
 shaders/enabled=true
 openxr/extensions/meta/passthrough=true

@@ -172,7 +172,7 @@ var _active_scene_path: String # this assumes that only a single scene will ever
 ###############################################################################
 
 var webxr_initializer: CanvasLayer
-var xr_interface: XRInterface
+var xr_interface: OpenXRInterface
 
 func _on_openxr_pose_recentered() -> void:
 	emit_signal("pose_recentered")
@@ -192,20 +192,24 @@ func initialize(origin: XROrigin3D, camera: XRCamera3D, left_hand: BeepSaberCont
 		webxr_initializer = webxr
 		return
 	
-	xr_interface = XRServer.find_interface("OpenXR") as XRInterface
+	xr_interface = XRServer.find_interface("OpenXR") as OpenXRInterface
 	if xr_interface: xr_interface.render_target_size_multiplier = render_scale
 	if xr_interface and xr_interface.is_initialized():
 		log_info("OpenXR initialised successfully")
-		if xr_interface.has_method(&"get_available_display_refresh_rates"):
-			var fps : Array = xr_interface.get_available_display_refresh_rates()
-			log_info("avaliable fps: "+str(fps))
-			if fps and fps.size() >= 1:
-				var max_fps: Variant = fps[fps.size() - 1]
-				if max_fps is float:
-					xr_interface.set_display_refresh_rate(max_fps as float)
-					Engine.set_physics_ticks_per_second(max_fps as int)
-		
-		
+		active_arvr_interface_name = "OpenXR"
+		# Standalone headsets allow selecting their refresh rate. On PC the
+		# runtime owns that setting, and SteamVR may not expose this extension.
+		if OS.get_name() == "Android":
+			var rates := xr_interface.get_available_display_refresh_rates()
+			if not rates.is_empty():
+				xr_interface.set_display_refresh_rate(float(rates.max()))
+		var refresh_rate := xr_interface.get_display_refresh_rate()
+		if refresh_rate > 0.0:
+			Engine.physics_ticks_per_second = roundi(refresh_rate)
+		elif OS.get_name() != "Android":
+			Engine.physics_ticks_per_second = 90
+		xr_interface.refresh_rate_changed.connect(_on_refresh_rate_changed)
+
 		# Turn off v-sync!
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
@@ -217,5 +221,11 @@ func initialize(origin: XROrigin3D, camera: XRCamera3D, left_hand: BeepSaberCont
 		MixedReality.set_mixed_reality(Settings.mixed_reality)
 
 	else:
-		log_info("OpenXR not initialized, please check if your headset is connected")
+		log_warning("OpenXR not initialized. For SteamVR: connect your headset, start SteamVR, " +
+			"and select SteamVR as the active OpenXR runtime in SteamVR Settings > OpenXR. " +
+			"Restart the game after changing the runtime. Starting the desktop simulator.")
 		inVR = false
+
+func _on_refresh_rate_changed(refresh_rate: float) -> void:
+	if refresh_rate > 0.0:
+		Engine.physics_ticks_per_second = roundi(refresh_rate)

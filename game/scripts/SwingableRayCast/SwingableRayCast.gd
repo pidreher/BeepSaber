@@ -49,7 +49,7 @@ func _ready() -> void:
 			_debug_curr_balls.append(new_ball)
 	
 	# no longer need original instance
-	remove_child($debug_ball)
+	$debug_ball.queue_free()
 
 # override so that we can update child segments too
 func _set_collision_mask_value(bit: int, value: bool) -> void:

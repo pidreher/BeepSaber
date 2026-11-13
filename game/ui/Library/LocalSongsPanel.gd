@@ -1,8 +1,8 @@
 # "My Songs" tab of the library: the local songs with covers, sorted by
 # All / Recently Added / Most Played, searchable with the in-game keyboard.
-# The selected song is shown in the shared SongDetails pane, where it can be
-# previewed, (un)favorited, deleted and loaded into the Now Playing panel.
-# Selecting the selected song again loads it, too.
+# Picking a song loads it into the song panel in the middle of the menu (which
+# shows its details, preview, favorite and delete) and plays its preview. The
+# details pane of this panel stays hidden, so the song is not shown twice.
 extends Control
 class_name LocalSongsPanel
 
@@ -18,7 +18,7 @@ var keyboard: OQ_UI2DKeyboard
 @onready var sort_selector := %SortSelector as OptionButton
 @onready var refresh_button := %RefreshButton as Button
 @onready var results := %Results as ScrollContainer
-@onready var results_list := %ResultsList as VBoxContainer
+@onready var results_list := %ResultsList as GridContainer
 @onready var list_message := %ListMessage as Label
 @onready var details := %Details as SongDetails
 @onready var status_label := %StatusLabel as Label
@@ -150,7 +150,7 @@ func _update_status() -> void:
 		parts.append("%d %s" % [total, "song" if total == 1 else "songs"])
 	else:
 		parts.append("%d of %d songs match" % [_songs.size(), total])
-	parts.append("select a song twice to load it")
+	parts.append("pick a song to load it")
 	status_label.text = "  ·  ".join(parts)
 
 func _on_cover_loaded(path: String, tex: Texture2D) -> void:
@@ -219,14 +219,12 @@ func _ensure_visible(row: Control) -> void:
 		results.ensure_control_visible(row)
 		_redraw()
 
-# selecting the selected song again loads it
+# picking a song loads it
 func _on_row_pressed(row: LocalSongRow) -> void:
 	var index := _songs.find(row.map)
 	if index < 0: return
-	if row.map == _selected:
-		_on_load_pressed()
-	else:
-		_select_index(index, true)
+	_select_index(index, true)
+	_on_load_pressed()
 
 func _on_load_pressed() -> void:
 	if _selected == null: return

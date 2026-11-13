@@ -57,7 +57,8 @@ func _update_buttons_and_sticks() -> void:
 	trigger_last_frame = trigger
 	ax = is_button_pressed(&"ax_button")
 	by = is_button_pressed(&"by_button")
-	trigger = is_button_pressed(&"trigger") or is_button_pressed(&"select_button")
+	trigger = is_button_pressed(&"trigger_click") or get_float(&"trigger") > 0.5 \
+		or is_button_pressed(&"select_button")
 	menu = is_button_pressed(&"menu_button")
 
 func _update_movement_aabb() -> void:
@@ -103,6 +104,16 @@ func _update_arc_rumble(delta: float) -> void:
 	var breath := 0.86 + 0.12 * sin(TAU * ARC_PULSE_RATE * _arc_time)
 	_send_rumble(ARC_BASS_FREQUENCY if bass_layer else 0.0,
 		strength * breath if bass_layer else strength, ARC_PULSE_DURATION)
+
+# Blades held together: a fine, uneven buzz like an arc welder. Call every physics
+# frame while it lasts. Each short pulse gets a random strength, sometimes a crackle
+# spike, and alternates between a high motor frequency and the runtime default.
+const WELD_PULSE_DURATION := 0.04
+func weld_rumble(amount: float) -> void:
+	if amount <= 0.0 or _is_simple_rumbling: return
+	# A steady strong buzz with a little jitter, renewed every frame while held.
+	var intensity := randf_range(0.7, 0.8)
+	_send_rumble(0.0, intensity * amount, WELD_PULSE_DURATION)
 
 func _send_rumble(frequency: float, intensity: float, duration: float) -> void:
 	trigger_haptic_pulse("haptic", frequency, intensity, duration, 0)

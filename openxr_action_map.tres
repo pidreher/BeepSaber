@@ -792,11 +792,11 @@ binding_path = "/user/hand/right/input/grip_surface/pose"
 
 [sub_resource type="OpenXRIPBinding" id="OpenXRIPBinding_7b312"]
 action = SubResource("OpenXRAction_jt1uy")
-binding_path = "/user/hand/left/input/system/click"
+binding_path = "/user/hand/left/input/thumbstick/click"
 
 [sub_resource type="OpenXRIPBinding" id="OpenXRIPBinding_ajt26"]
 action = SubResource("OpenXRAction_jt1uy")
-binding_path = "/user/hand/right/input/system/click"
+binding_path = "/user/hand/right/input/thumbstick/click"
 
 [sub_resource type="OpenXRIPBinding" id="OpenXRIPBinding_grl1h"]
 action = SubResource("OpenXRAction_fk4kp")

@@ -4,7 +4,6 @@ class_name ChainLink
 var which_saber: int
 var _mesh: Mesh
 var _mat: ShaderMaterial
-@export var min_speed := 0.5
 
 @onready var mi := $Mesh as MeshInstance3D
 
@@ -23,8 +22,8 @@ func _ready() -> void:
 	piece_right.set_chain_head(false)
 
 static func construct_chain(chain_info: ChainInfo, current_beat: float, note_info_refs: Array[ColorNoteInfo], cube_refs: Array[BeepCube]) -> void:
-	# instead of just making a new note head for a new chain, beat saber
-	# modifies an already-existing note to be the head, which is why we have to
+	# instead of spawning a new note head for a chain, the map format
+	# turns an already-existing note into the head, which is why we have to
 	# do all this garbage with keeping references to other notes that were
 	# spawned this frame.
 	var i := 0
@@ -48,11 +47,11 @@ static func construct_chain(chain_info: ChainInfo, current_beat: float, note_inf
 	# you just drew is the mid point of the curve.
 	var head_pos := Vector2(
 		Settings.LANE_DISTANCE_X * float(chain_info.head_line_index) + Settings.LANE_ZERO_X,
-		Constants.LANE_DISTANCE_Y * float(chain_info.head_line_layer) + Constants.LAYER_ZERO_Y
+		Constants.layer_y(float(chain_info.head_line_layer))
 	)
 	var tail_pos := Vector2(
 		Settings.LANE_DISTANCE_X * float(chain_info.tail_line_index) + Settings.LANE_ZERO_X,
-		Constants.LANE_DISTANCE_Y * float(chain_info.tail_line_layer) + Constants.LAYER_ZERO_Y
+		Constants.layer_y(float(chain_info.tail_line_layer))
 	)
 	var mid_pos := head_pos + Utils.rotation_unit_vector(chain_info.head_cut_angle) * head_pos.distance_to(tail_pos) * 0.5
 	i = 1
@@ -62,12 +61,11 @@ static func construct_chain(chain_info: ChainInfo, current_beat: float, note_inf
 		i += 1
 
 func spawn(chain_info: ChainInfo, current_beat: float, head_pos: Vector2, tail_pos: Vector2, mid_pos: Vector2, link_index: int) -> void:
-	# re-enable our process_mode first otherwise it seems like Godot-internals
-	# can behave weirdly (ex. AnimationPlayer won't always play correctly)
+	# Pooled nodes resume processing before any spawn state is changed.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	var color := Map.color_left if chain_info.color == 0 else Map.color_right
-	speed = Constants.BEAT_DISTANCE * Map.current_info.beats_per_minute * 0.016666666666666667
+	speed = Map.beat_distance * Map.current_info.beats_per_minute * 0.016666666666666667
 	which_saber = chain_info.color
 	
 	var lerp_factor := float(link_index) / float(chain_info.slice_count - 1) * chain_info.squish_factor
@@ -82,16 +80,18 @@ func spawn(chain_info: ChainInfo, current_beat: float, head_pos: Vector2, tail_p
 	
 	transform.origin.x = bezier_pos.x
 	transform.origin.y = bezier_pos.y
-	transform.origin.z = -(beat - current_beat) * Constants.BEAT_DISTANCE
+	transform.origin.z = -(beat - current_beat) * Map.beat_distance
 	
 	add_lane_rotation(chain_info.rotation)
-	
-	rotation.z = q0.angle_to_point(q1) - TAU*0.25
+	# Preserve the bezier tangent: links rise without the notes' entry tumble.
+	var row := lerpf(float(chain_info.head_line_layer), float(chain_info.tail_line_layer), lerp_factor)
+	configure_jump(row, q0.angle_to_point(q1) - TAU * 0.25)
+	start_fly_in(beat, current_beat)
 	
 	# little bit of forgiveness.  if the chain link is more than a meter away
 	# from the chain head, its hitbox is extended to halfway between the link
 	# and the head.
-	var z_distance_from_head := (beat - chain_info.head_beat) * Constants.BEAT_DISTANCE
+	var z_distance_from_head := (beat - chain_info.head_beat) * Map.beat_distance
 	if z_distance_from_head > 1.0:
 		var collision := $Area3D/CollisionShape3D as CollisionShape3D
 		var new_size := z_distance_from_head * 0.5
@@ -102,10 +102,7 @@ func spawn(chain_info: ChainInfo, current_beat: float, head_pos: Vector2, tail_p
 	piece_right.set_color(color, false)
 	_mat.set_shader_parameter(&"color", color)
 	
-	var anim := $AnimationPlayer as AnimationPlayer
-	var anim_speed := Map.current_difficulty.note_jump_movement_speed / 9.0
-	anim.speed_scale = maxf(min_speed,anim_speed)
-	anim.play(&"Spawn")
+	mi.transform = Transform3D.IDENTITY
 	
 	mi.visible = true
 
@@ -149,17 +146,9 @@ func _start_cut_pieces(cutplane: Plane) -> void:
 	piece_left.global_transform = global_transform
 	piece_right.global_transform = global_transform
 	
-	# calculate angle and position of the cut
-	var cut_angle_abs := Vector2(cutplane.normal.x, cutplane.normal.y).angle()
-	var cut_dist_from_center := cutplane.distance_to(transform.origin)
-	var cut_angle_rel := cut_angle_abs - global_rotation.z
-	
 	_piece_death_count = 0
-	var p := global_transform * cutplane
-	piece_left.start_cut_plane(-p.normal, -p.d)
-	piece_right.start_cut_plane(p.normal, p.d)
-
-	# some impulse so the cube half moves
-	var split_vector := p.normal * 2.0
-	piece_left.apply_central_impulse(piece_left.transform * -split_vector)
-	piece_right.apply_central_impulse(piece_right.transform * split_vector)
+	piece_left.start_cut_plane(-cutplane.normal, -cutplane.d)
+	piece_right.start_cut_plane(cutplane.normal, cutplane.d)
+	var split_vector := cutplane.normal * 2.0
+	piece_left.apply_central_impulse(-split_vector)
+	piece_right.apply_central_impulse(split_vector)

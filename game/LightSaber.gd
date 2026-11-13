@@ -53,8 +53,9 @@ func _update_size_and_angle():
 		#extra_offset_pos.z += .055
 		#extra_offset_pos.y += -.005
 	else:
-		collision_cylinder.height = 1.248
-		collision_shape.position.y = .651
+		# The blade is 1.0 m long.
+		collision_cylinder.height = 1.048
+		collision_shape.position.y = .551
 
 func _show() -> void:
 	_update_size_and_angle()
@@ -73,17 +74,43 @@ func _hide() -> void:
 		_anim.play(&"HideShort" if Settings.claws else &"Hide")
 		saber_visual._hide()
 
+const REFLECTION_SHADER := preload("res://game/environment/Reflection.gdshader")
+
 func set_color(color: Color) -> void:
 	saber_visual.set_color(color)
+	_update_reflection(color)
+
+# The blade is mirrored on reflective floors (see game/environment). The mirrored copy is
+# a child of the blade that shares its mesh, so it follows the extend animation.
+func _update_reflection(color: Color) -> void:
+	var blade := saber_visual.get_node_or_null(^"LightSaber_Mesh") as MeshInstance3D
+	if blade == null: return
+	var copy := blade.get_node_or_null(^"Reflection") as MeshInstance3D
+	if copy == null:
+		copy = MeshInstance3D.new()
+		copy.name = &"Reflection"
+		copy.mesh = blade.mesh
+		copy.layers = blade.layers
+		copy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		copy.extra_cull_margin = 4.0
+		var material := ShaderMaterial.new()
+		material.shader = REFLECTION_SHADER
+		material.render_priority = -10
+		copy.material_override = material
+		blade.add_child(copy)
+	(copy.material_override as ShaderMaterial).set_shader_parameter(&"color", color * 0.8)
+	copy.visible = Settings.reflections
 
 func on_settings_changed(key: StringName) -> void:
 	match key:
 		&"color_left":
 			if type == 0:
-				saber_visual.set_color(Settings.color_left)
+				set_color(Settings.color_left)
 		&"color_right":
 			if type == 1:
-				saber_visual.set_color(Settings.color_right)
+				set_color(Settings.color_right)
+		&"reflections":
+			_update_reflection(Settings.color_left if type == 0 else Settings.color_right)
 		&"thickness":
 			saber_visual.set_thickness(Settings.thickness)
 		&"saber_tail":
@@ -213,7 +240,7 @@ func set_saber(saber_path: String) -> void:
 			i.queue_free()
 		saber_visual = newsaber
 		$saber_holder.add_child(saber_visual)
-		saber_visual.set_color(Settings.color_right if type else Settings.color_left)
+		set_color(Settings.color_right if type else Settings.color_left)
 		saber_visual.set_thickness(Settings.thickness)
 		saber_visual.set_trail(Settings.saber_tail)
 
@@ -233,13 +260,14 @@ func _handle_area_collided(area: Area3D) -> void:
 	var controller_speed: Vector3 = (saber_end - saber_end_past) / last_dt
 	# faster swings feel (and sound) stronger: ~1.5 m/s tip speed is a soft tap,
 	# ~9 m/s a full swing
-	var hit_strength := clampf((controller_speed.length() - 1.5) / 7.5, 0.0, 1.0)
+	# The cut sound is silent below 1.5 m/s tip speed and full from 4 m/s.
+	var hit_strength := smoothstep(1.5, 4.0, controller_speed.length())
 	saber_visual.hit(time_offset, hit_strength)
-	controller.simple_rumble(lerpf(0.35, 1.0, hit_strength), lerpf(0.05, 0.13, hit_strength))
+	# Every cut gets the same full-strength 0.13 s pulse.
+	controller.simple_rumble(1.0, 0.13)
 	
 	var o := controller.global_transform.origin
-	const BEAT_DISTANCE := 4.0
-	var cutplane := Plane(o, saber_end, saber_end_past + Vector3(0, 0, BEAT_DISTANCE * Map.current_info.beats_per_minute * last_dt / 30)) # Account for relative position to track speed
+	var cutplane := Plane(o, saber_end, saber_end_past + Vector3(0, 0, Map.beat_distance * Map.current_info.beats_per_minute * last_dt / 30)) # Account for relative position to track speed
 	note.cut(self, controller_speed, cutplane, controller)
 
 func _on_AnimationPlayer_animation_started(_anim_name: StringName) -> void:

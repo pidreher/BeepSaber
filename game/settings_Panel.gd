@@ -6,6 +6,7 @@ signal apply()
 
 @onready var saber_control := $ScrollContainer/VBox/SaberTypeRow/saber as OptionButton
 @onready var glare_control := $ScrollContainer/VBox/glare as CheckButton
+@onready var reflections_control := $ScrollContainer/VBox/reflections as CheckButton
 @onready var saber_tail_control := $ScrollContainer/VBox/saber_tail as CheckButton
 @onready var saber_thickness := $ScrollContainer/VBox/SaberThicknessRow/saber_thickness as HSlider
 @onready var cut_blocks := $ScrollContainer/VBox/cut_blocks as CheckButton
@@ -114,6 +115,7 @@ func set_controls_from_settings() -> void:
 	right_saber_col.color = Settings.color_right
 	saber_tail_control.button_pressed = Settings.saber_tail
 	glare_control.button_pressed = Settings.glare
+	reflections_control.button_pressed = Settings.reflections
 	saber_control.select(Settings.saber_visual)
 	show_debug_control.button_pressed = Settings.show_debug_info
 	mixed_reality_control.button_pressed = Settings.mixed_reality
@@ -162,6 +164,9 @@ func _on_right_saber_color_changed(color: Color) -> void:
 
 func _on_saber_tail_toggled(button_pressed: bool) -> void:
 	Settings.saber_tail = button_pressed
+
+func _on_reflections_toggled(button_pressed: bool) -> void:
+	Settings.reflections = button_pressed
 
 func _on_glare_toggled(button_pressed: bool) -> void:
 	Settings.glare = button_pressed

@@ -45,3 +45,10 @@ func _instance_new_scene(during_presizing: bool) -> Node3D:
 
 func _on_scene_released(node: PooledNode3D) -> void:
 	_free_list.push_back(node)
+
+func _exit_tree() -> void:
+	# Available instances are outside the scene tree, so the pool owns cleanup.
+	for node in _free_list:
+		if is_instance_valid(node) and node.get_parent() == null:
+			node.free()
+	_free_list.clear()

@@ -19,6 +19,8 @@ enum ResizeModes {AUTO_RESIZE, FIXED}
 func set_transparent(value: bool) -> void:
 	transparent = value
 	mesh_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if transparent else BaseMaterial3D.TRANSPARENCY_DISABLED
+	# Draw after the stage's translucent effects (see OQ_UI2DCanvas.UI_RENDER_PRIORITY).
+	mesh_material.render_priority = OQ_UI2DCanvas.UI_RENDER_PRIORITY if transparent else 0
 
 
 @onready var ui_label := $SubViewport/ColorRect/CenterContainer/Label as Label

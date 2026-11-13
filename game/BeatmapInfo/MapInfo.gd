@@ -18,6 +18,8 @@ var song_time_offset: float
 var custom_data: Dictionary
 var last_beat: float
 var have_song: bool
+# The tempo from Info.dat. beats_per_minute is rescaled by the song speed when a map starts.
+var original_bpm := -1.0
 
 var filepath: String
 var difficulty_beatmaps: Array[DifficultyInfo]

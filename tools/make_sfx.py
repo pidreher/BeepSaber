@@ -5,7 +5,7 @@
 """Synthesizes the game's sound effects (original sounds, no samples used).
 
     uv run tools/make_sfx.py
-    uv run tools/make_sfx.py --only arc_loop clash_loop saber_clash
+    uv run tools/make_sfx.py --only arc_loop clash_loop cut
 
 Writes 16-bit mono WAVs to game/data/sfx/.
 """
@@ -76,6 +76,30 @@ def hit() -> np.ndarray:
     return finish(x, drive=1.6)
 
 
+def cut() -> np.ndarray:
+    """Cube cut: a bright crack, then a heavy ~75 Hz thump that rumbles on for about
+    half a second, with a faint 1-3 kHz shimmer in the tail."""
+    t = t_axis(0.9)
+    # crack: ~25 ms of bright noise plus a short click, ahead of the thump
+    crack = band(rng.standard_normal(t.size), 3000, 15000) * np.exp(-t / 0.01)
+    crack += 0.8 * band(rng.standard_normal(t.size), 500, 3000) * np.exp(-t / 0.004)
+    # thump: swells in over ~10 ms, settles from ~95 Hz to ~72 Hz and dies within ~0.4 s
+    attack = 1 - np.exp(-t / 0.008)
+    thump = glide_sine(72 + 23 * np.exp(-t / 0.035)) * attack * np.exp(-t / 0.13)
+    # its overtone gives the impact some 120-250 Hz punch
+    overtone = glide_sine(150 + 40 * np.exp(-t / 0.03)) * attack * np.exp(-t / 0.05)
+    # rumble: rough low noise with a fast random wobble, so the tail is not a clean tone
+    wobble = 1 + 2.7 * band(rng.standard_normal(t.size), None, 30, order=2)
+    rumble = band(rng.standard_normal(t.size), 40, 140) * attack * np.exp(-t / 0.14) * wobble
+    # sub: a slower 45 Hz layer under the end of the tail
+    sub = np.sin(2 * np.pi * 45 * t) * attack * np.exp(-t / 0.22)
+    # shimmer: band noise around 1-3 kHz that lingers after the thump
+    shimmer = band(rng.standard_normal(t.size), 800, 3500) * (1 - np.exp(-t / 0.06)) * np.exp(-t / 0.28)
+    x = 1.0 * thump + 0.35 * overtone + 0.5 * rumble + 0.3 * sub + 1.4 * crack + 0.22 * shimmer
+    # gentle saturation thickens the impact
+    return finish(x, drive=2.0, fade=0.05)
+
+
 def fail() -> np.ndarray:
     """Failing a song: impact, then a descending power-down sweep fading into rumble."""
     t = t_axis(2.2)
@@ -128,30 +152,33 @@ def arc_loop() -> np.ndarray:
 
 
 def clash_loop() -> np.ndarray:
-    """A restrained crackling sizzle while two blades remain pressed together."""
-    t = t_axis(1.0)
-    crackle = periodic_noise(1.0, 900, 4200, 9022)
-    buzz = np.sin(2 * np.pi * 110 * t + 0.45 * np.sin(2 * np.pi * 55 * t))
-    x = 0.48 * buzz + 0.5 * crackle * (0.7 + 0.3 * np.sin(2 * np.pi * 13 * t))
+    """Welding sizzle while two blades stay pressed together: band-limited hiss,
+    random crackle bursts and a little mains-like hum. Loops seamlessly."""
+    seconds = 2.0
+    n = int(SR * seconds)
+    t = np.arange(n) / SR
+    loop_rng = np.random.default_rng(9022)
+    hiss = periodic_noise(seconds, 1800, 7500, 9024)
+    # crackle: many tiny bursts of wide-band noise with random times and sizes.
+    # Bursts near the end wrap to the start, so the loop point is invisible.
+    grains = np.zeros(n)
+    noise = periodic_noise(seconds, 700, 9000, 9025)
+    for start in loop_rng.integers(0, n, 260):
+        length = int(SR * loop_rng.uniform(0.0015, 0.012))
+        amp = loop_rng.uniform(0.2, 1.0) ** 2
+        idx = (start + np.arange(length)) % n
+        grains[idx] += amp * np.exp(-np.arange(length) / (length * 0.3))
+    crackle = noise * grains
+    # hum: 60 Hz with its 2nd harmonic, slightly rough (no clean tones)
+    hum = (np.sin(2 * np.pi * 60 * t) + 0.5 * np.sin(2 * np.pi * 120 * t)) * (0.8 + 0.2 * np.abs(hiss))
+    x = 0.35 * hiss + 0.9 * crackle + 0.18 * hum
+    x = np.tanh(1.3 * x)
     return x / np.max(np.abs(x)) * 0.75
 
 
-def saber_clash() -> np.ndarray:
-    """A short electrical crack, weighty impact and dying resonant zing."""
-    t = t_axis(0.46)
-    noise = np.random.default_rng(9023).standard_normal(t.size)
-    crack = band(noise, 1800, 6500) * np.exp(-t / 0.018)
-    thump = glide_sine(60 + 110 * np.exp(-t / 0.018)) * np.exp(-t / 0.065)
-    ring = sum(a * np.sin(2 * np.pi * f * t) * np.exp(-t / d)
-               for f, a, d in [(280, 0.34, 0.12), (730, 0.24, 0.09), (1230, 0.12, 0.065)])
-    zap = glide_sine(210 + 1400 * np.exp(-t / 0.032)) * np.exp(-t / 0.055)
-    x = (1.2 * crack + 0.7 * thump + ring + 0.24 * zap) * (1 - np.exp(-t / 0.0008))
-    return finish(x, drive=1.35, fade=0.025)
-
-
 if __name__ == "__main__":
-    generators = dict(hit=hit, fail=fail, arc_loop=arc_loop,
-                      clash_loop=clash_loop, saber_clash=saber_clash)
+    generators = dict(hit=hit, cut=cut, fail=fail, arc_loop=arc_loop,
+                      clash_loop=clash_loop)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--only", nargs="+", choices=generators)
     args = parser.parse_args()

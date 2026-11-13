@@ -7,8 +7,8 @@
 # sorting, favorites, deleting, cover cache) and the song preview player, which
 # the library, the BeatSaver browser and the song uploader use.
 #
-# This file also contains the logic to load a beatmap in the format that
-# normal Beat Saber uses. So you can load here custom beat saber songs too
+# This file also contains the logic to load a beatmap in the common custom
+# level format (Info.dat plus difficulty files).
 extends Panel
 class_name MainMenu
 
@@ -481,6 +481,30 @@ func _load_map_and_start(map: MapInfo) -> void:
 
 	start_map.emit(map, diff_info)
 
+func _on_card_preview_pressed() -> void:
+	if current_map == null: return
+	if is_previewing(current_map.filepath):
+		stop_preview()
+	else:
+		play_map_preview(current_map)
+
+func _on_card_delete_confirmed() -> void:
+	if current_map == null: return
+	delete_song(current_map)
+	if current_map == null:
+		_set_current_map(null, false)
+
+var _card_preview_shown := false
+func _process(_delta: float) -> void:
+	if not is_visible_in_tree(): return
+	var playing := current_map != null and is_previewing(current_map.filepath)
+	if playing != _card_preview_shown:
+		_card_preview_shown = playing
+		song_card.set_preview_playing(playing)
+		var canvas := get_parent()
+		while canvas != null and not canvas is OQ_UI2DCanvas: canvas = canvas.get_parent()
+		if canvas != null: (canvas as OQ_UI2DCanvas)._input_update()
+
 func _on_Play_Button_pressed() -> void:
 	if current_map != null:
 		Settings.last_map = current_map.filepath
@@ -549,6 +573,8 @@ func _ready() -> void:
 	_characteristic_group.allow_unpress = false
 	_difficulty_group.allow_unpress = false
 	song_card.favorite_toggled.connect(_on_card_favorite_toggled)
+	song_card.preview_pressed.connect(_on_card_preview_pressed)
+	song_card.delete_confirmed.connect(_on_card_delete_confirmed)
 
 	UI_AudioEngine.attach_children(self)
 

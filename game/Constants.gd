@@ -1,15 +1,49 @@
 extends Node
 
-const DEFAULT_LANE_ZERO_X := -0.975 # -1.5 * DEFAULT_LANE_DISTANCE_X
-const LAYER_ZERO_Y := 0.8
-const BEAT_DISTANCE := 4.0
-const DEFAULT_LANE_DISTANCE_X := 0.65
-const LANE_DISTANCE_Y := 0.55
+# Note grid, wall and note jump dimensions.
+const DEFAULT_LANE_ZERO_X := -0.9 # -1.5 * DEFAULT_LANE_DISTANCE_X
+const DEFAULT_LANE_DISTANCE_X := 0.6
+# Rows are not evenly spaced: 0.85 m, 1.40 m and 1.90 m for a 1.80 m player.
+const LAYER_Y := [0.85, 1.40, 1.90]
+const LANE_DISTANCE_Y := 0.55 # used only to extrapolate fractional or out-of-range layers
+# Walls start 0.15 m below the 0.25/0.85/1.45 m note lines (0.1/0.7/1.3 m), are 0.6 m tall
+# per layer of height, and are cut off at 3.1 m.
+const WALL_LAYER_HEIGHT := 0.6
+const WALL_MIN_Y := 0.1
+const WALL_TOP_Y := 3.1
+# At its beat a note is this far in front of the head.
+const HIT_DISTANCE_FROM_HEAD := 0.65
+# The player stands here after recentering.
+const PLAYER_Z := 1.0
+# Fallback when a map has no NJS: Easy-Hard 10, Expert 12, Expert+ 16.
+const DEFAULT_NJS := 10.0
+const MAX_HALF_JUMP_DISTANCE := 18.0
+const START_HALF_JUMP_BEATS := 4.0
+const MIN_HALF_JUMP_BEATS := 0.25
+# Before their jump, objects fly in from this far behind their jump start, taking this long.
+const FLY_IN_TIME := 0.5
+const FLY_IN_DISTANCE := 100.0
 const MISS_Z := 2.5
 const DIRECTION8_OFFSET := 2 * TAU 
 const DIRECTION8_COMPARE := DIRECTION8_OFFSET - .001
 const ROTATION_EPS := 1e-5
 const ROTATION_EPS_DEGREES := ROTATION_EPS * PI / 180.
+
+# Height of a note layer at the moment it is cut, including the player height offset.
+static func layer_y(layer: float) -> float:
+	var y: float
+	if layer <= 0.0:
+		y = LAYER_Y[0] + layer * LANE_DISTANCE_Y
+	elif layer >= 2.0:
+		y = LAYER_Y[2] + (layer - 2.0) * (LAYER_Y[2] - LAYER_Y[1])
+	else:
+		var i := int(layer)
+		y = lerpf(LAYER_Y[i], LAYER_Y[i + 1], layer - i)
+	return y + Map.jump_offset_y
+
+# Notes shift with the player's height: clamp((height - 1.8) / 2, -0.2, 0.6).
+static func jump_offset_for_player_height(height: float) -> float:
+	return clampf((height - 1.8) * 0.5, -0.2, 0.6)
 
 var CUBE_ROTATIONS := PackedFloat64Array([PI, 0.0, -TAU*0.25, TAU*0.25, -TAU*0.375, TAU*0.375, -TAU*0.125, TAU*0.125, 0.0])
 var ROTATION_UNIT_VECTORS := PackedVector2Array([

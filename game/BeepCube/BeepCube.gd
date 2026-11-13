@@ -18,7 +18,15 @@ var is_dot: bool
 var _mesh: Mesh
 var _mat: ShaderMaterial
 var _cut_color := Color.WHITE
-@export var min_speed := 0.5
+# Mirrored copy drawn on reflective floors (see game/environment).
+var _reflection := ShaderMaterial.new()
+const REFLECTION_SHADER := preload("res://game/environment/Reflection.gdshader")
+const REFLECTION_STRENGTH := 0.5
+const SYMBOL_GLOW_SHADER := preload("res://game/BeepCube/NoteSymbolGlow.gdshader")
+static var _symbol_glow_mesh: QuadMesh
+static var _symbol_glow_materials: Dictionary = {}
+var _symbol_glow: MeshInstance3D
+const BEAT_ACCURACY_ZERO_AT := 0.125
 
 var piece_left : CutPiece = null
 var piece_right : CutPiece = null
@@ -29,6 +37,16 @@ var chain_head = false
 func _ready() -> void:
 	_mat = mi.material_override as ShaderMaterial
 	_mesh = mi.mesh
+	_reflection.shader = REFLECTION_SHADER
+	_reflection.render_priority = -10
+	if _symbol_glow_mesh == null:
+		_symbol_glow_mesh = QuadMesh.new()
+		_symbol_glow_mesh.size = Vector2.ONE
+	_symbol_glow = MeshInstance3D.new()
+	_symbol_glow.mesh = _symbol_glow_mesh
+	_symbol_glow.layers = mi.layers
+	_symbol_glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.add_child(_symbol_glow)
 	
 	# init our cut pieces with unique copies of our own material for reference,
 	# and enable "bouncy" physics behavior
@@ -39,15 +57,14 @@ func _ready() -> void:
 	slice_particles.top_level = true
 	
 func spawn(note_info: ColorNoteInfo, current_beat: float) -> void:
-	# re-enable our process_mode first otherwise it seems like Godot-internals
-	# can behave weirdly (ex. AnimationPlayer won't always play correctly)
+	# Pooled nodes resume processing before any spawn state is changed.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	var color := Map.color_left if note_info.color == 0 else Map.color_right
 	if note_info.custom_color.a > 0: # Chroma
 		color = note_info.custom_color
 	_cut_color = color
-	speed = Constants.BEAT_DISTANCE * Map.current_info.beats_per_minute * 0.016666666666666667
+	speed = Map.beat_distance * Map.current_info.beats_per_minute * 0.016666666666666667
 	beat = note_info.beat
 	which_saber = note_info.color
 	is_dot = note_info.cut_angle >= Constants.DIRECTION8_COMPARE
@@ -59,16 +76,18 @@ func spawn(note_info: ColorNoteInfo, current_beat: float) -> void:
 		
 	scale = Vector3(Settings.block_size/100.,Settings.block_size/100.,Settings.block_size/100.)
 	transform.origin.x = Settings.LANE_DISTANCE_X * float(note_info.line_index) + Settings.LANE_ZERO_X
-	transform.origin.y = Constants.LANE_DISTANCE_Y * float(note_info.line_layer) + Constants.LAYER_ZERO_Y
-	transform.origin.z = -(note_info.beat - current_beat) * Constants.BEAT_DISTANCE
+	transform.origin.y = Constants.layer_y(float(note_info.line_layer))
+	transform.origin.z = -(note_info.beat - current_beat) * Map.beat_distance
 	
 	add_lane_rotation(note_info.rotation)
-	
-	rotation.z = note_info.cut_angle
+	configure_jump(float(note_info.line_layer), 0.0 if is_dot else note_info.cut_angle, true)
+	start_fly_in(note_info.beat, current_beat)
 	
 	piece_left.set_color(color, is_dot)
 	piece_right.set_color(color, is_dot)
 	_mat.set_shader_parameter(&"color", color)
+	_mat.next_pass = _reflection if Settings.reflections else null
+	_reflection.set_shader_parameter(&"color", color * REFLECTION_STRENGTH)
 	_mat.set_shader_parameter(&"is_dot", is_dot)
 	_mat.set_shader_parameter(&"arrows_enabled", Settings.arrows_enabled)
 	# since cube instances get recycled, we gotta reset cubes that were chain
@@ -92,14 +111,26 @@ func spawn(note_info: ColorNoteInfo, current_beat: float) -> void:
 	small_coll_area.set_collision_layer_value(CollisionLayerConstants.LeftNote_bit, not is_left_note)
 	small_coll_area.set_collision_layer_value(CollisionLayerConstants.RightNote_bit, is_left_note)
 	
-	# play the spawn animation when this cube enters the scene
-	var anim := $AnimationPlayer as AnimationPlayer
-	var anim_speed := Map.current_difficulty.note_jump_movement_speed / 9.0
-	anim.speed_scale = maxf(min_speed,anim_speed)
-	anim.play(&"Spawn")
+	# The root now carries the full jump, so visuals and hitboxes stay aligned.
+	mi.transform = Transform3D.IDENTITY
+	_update_symbol_glow(color)
 	
 	slice_particles.reset()
 	mi.visible = true
+
+# Reuse one additive material per color/shape, including custom map colors.
+func _update_symbol_glow(color: Color) -> void:
+	var key := Vector4(color.r, color.g, color.b, 1.0 if is_dot else 0.0)
+	if not _symbol_glow_materials.has(key):
+		var material := ShaderMaterial.new()
+		material.shader = SYMBOL_GLOW_SHADER
+		material.set_shader_parameter(&"color", color.lerp(Color.WHITE, 0.3))
+		material.set_shader_parameter(&"is_dot", is_dot)
+		_symbol_glow_materials[key] = material
+	_symbol_glow.material_override = _symbol_glow_materials[key]
+	_symbol_glow.position = Vector3(0.0, 0.0 if is_dot else 0.108, 0.253)
+	_symbol_glow.scale = Vector3(0.5, 0.5, 1.0) if is_dot else Vector3(0.56, 0.28, 1.0)
+	_symbol_glow.visible = is_dot or Settings.arrows_enabled
 
 # call this when clearing the track
 func clear_from_track() -> void:
@@ -139,9 +170,8 @@ func set_arc_tail() -> void:
 func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController) -> void:
 	var world_cut_speed := cut_speed
 	# compute the angle between the cube orientation and the cut direction
-	cut_speed = cut_speed.rotated(Vector3(0,1,0), -rotation.y)
-	var cut_direction_xy := -Vector3(cut_speed.x, cut_speed.y, 0.0).normalized()
-	var base_cut_angle_accuracy := global_transform.basis.orthonormalized().y.dot(cut_direction_xy)
+	var cut_direction := -cut_speed.slide(_lane_basis.z).normalized()
+	var base_cut_angle_accuracy := global_transform.basis.orthonormalized().y.dot(cut_direction)
 	var cut_distance := cut_plane.distance_to(global_transform.origin)
 	var distance_scale := 100./Settings.block_size
 	
@@ -153,7 +183,10 @@ func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: Be
 		var travel_distance_factor := controller.movement_aabb.get_longest_axis_size()
 		travel_distance_factor = clampf((travel_distance_factor-0.5)/0.5, 0.0, 1.0)
 		# allows a bit of save margin where the beat is considered 100% correct
-		var beat_accuracy := clampf((1.0 - absf(global_transform.origin.z)) / 0.5, 0.0, 1.0)
+		# Timing in seconds (track-local z=0 is on the beat): full within 62.5 ms, none past 125 ms.
+		# This is the old 0.5 m / 1 m window at 8 m/s, so it no longer depends on the note speed.
+		var seconds_off := absf(position.dot(_lane_basis.z)) / maxf(speed, 0.1)
+		var beat_accuracy := clampf((1.0 - seconds_off / BEAT_ACCURACY_ZERO_AT) / 0.5, 0.0, 1.0)
 		Scoreboard.note_cut(saber, transform.origin, lane_rotation, beat_accuracy, cut_angle_accuracy, cut_distance_accuracy, travel_distance_factor, arc_head, arc_tail, chain_head)
 		cutted.emit(true)
 	else:

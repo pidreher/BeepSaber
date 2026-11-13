@@ -121,7 +121,7 @@ func _on_SubmitButton_pressed() -> void:
 		"system_tag": MODELS[model_select.text],
 	}
 	
-	# initial beatsaber request
+	# initial level request
 	if beatsage_request_.request_custom_level(request_data):
 		submit_button.disabled = true
 		progress_bar.value = 0

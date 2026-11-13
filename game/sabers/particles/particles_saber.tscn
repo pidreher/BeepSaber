@@ -48,7 +48,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector3(0, 1.255, 0), Vector3(0, 0.051752, 0)]
+"values": [Vector3(0, 1.055, 0), Vector3(0, 0.051752, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -199,7 +199,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [1.2]
+"values": [1.0]
 }
 
 [sub_resource type="Animation" id="5"]
@@ -226,7 +226,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0.4, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector3(0, 0.051752, 0), Vector3(0, 1.2554, 0)]
+"values": [Vector3(0, 0.051752, 0), Vector3(0, 1.0554, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -301,7 +301,7 @@ tracks/7/keys = {
 "times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(0, 0),
 "update": 0,
-"values": [0.0, 1.15]
+"values": [0.0, 0.95]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_kyofm"]
@@ -386,7 +386,7 @@ libraries = {
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.049218, 0)
 
 [node name="tip" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.255, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.055, 0)
 
 [node name="CPUParticles3D" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.736082, 0)
@@ -419,4 +419,4 @@ bus = &"SFX"
 
 [node name="tail" parent="." instance=ExtResource("8_m1jst")]
 transform = Transform3D(0.999998, -6.66134e-16, -1.3145e-13, -5.39704e-17, 0.9998, -0.0189659, -7.10543e-14, 0.0204335, 0.99981, -9.96203e-18, 0.048214, 2.27911e-10)
-size = 1.2
+size = 1.0

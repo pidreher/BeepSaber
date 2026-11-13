@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://game/Wall/WallBody.gdshader" id="1"]
+
+[resource]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("1")
+shader_parameter/albedo_color = Color(1.8, -0.2, -0.2, 0)
+shader_parameter/size = Vector3(1, 1, 1)

@@ -57,13 +57,13 @@ func _init(
 func create_curve() -> void:
 	head_pos = Vector3(
 		Settings.LANE_DISTANCE_X * float(head_line_index) + Settings.LANE_ZERO_X,
-		Constants.LANE_DISTANCE_Y * float(head_line_layer) + Constants.LAYER_ZERO_Y,
-		-head_beat * Constants.BEAT_DISTANCE
+		Constants.layer_y(float(head_line_layer)),
+		-head_beat * Map.beat_distance
 	)
 	tail_pos = Vector3(
 		Settings.LANE_DISTANCE_X * float(tail_line_index) + Settings.LANE_ZERO_X,
-		Constants.LANE_DISTANCE_Y * float(tail_line_layer) + Constants.LAYER_ZERO_Y,
-		-tail_beat * Constants.BEAT_DISTANCE
+		Constants.layer_y(float(tail_line_layer)),
+		-tail_beat * Map.beat_distance
 	)	
 	
 	var head_cut_rotation: Vector2

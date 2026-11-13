@@ -42,8 +42,10 @@ func _ready(game: BeepSaber_Game) -> void:
 	Scoreboard.paused = false
 
 func _physics_process(game: BeepSaber_Game) -> void:
-	if not game._failing and (game.left_controller.by_just_pressed() or game.left_controller.menu_just_pressed()):
+	if not game._failing and (game.left_controller.by_just_pressed() or game.left_controller.menu_just_pressed() \
+		or game.right_controller.by_just_pressed() or game.right_controller.menu_just_pressed()):
 		game._transition_game_state(game.gamestate_paused)
+		return
 	if game._audio_synced_after_restart:
 		_process_map(game)
 	else:
@@ -56,14 +58,16 @@ func _physics_process(game: BeepSaber_Game) -> void:
 var bomb_template := load("res://game/Bomb/Bomb.tscn") as PackedScene
 var wall_template := load("res://game/Wall/Wall.tscn") as PackedScene
 var arc_template := load("res://game/Arc/Arc.tscn") as PackedScene
-const BEATS_AHEAD := 4.0
 
 func _process_map(game: BeepSaber_Game) -> void:
 	if (Map.current_info == null):
 		return
 	
 	var current_beat := game.song_player.get_playback_position() * Map.current_info.beats_per_minute * 0.016666666666666667
-	var look_ahead := current_beat + BEATS_AHEAD
+	# Objects start their jump one half jump before their beat: never more than 18 m away,
+	# and closer for fast maps (Map.setup_note_jump). Before that they fly in from far away.
+	var look_ahead := current_beat + Map.half_jump_beats \
+		+ Constants.FLY_IN_TIME * Map.current_info.beats_per_minute / 60.0
 	
 	# chains connect to a regular colornote and modify it, so we have to keep
 	# track of what notes were spawned this frame, in case any become the head

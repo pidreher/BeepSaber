@@ -1,10 +1,12 @@
 extends Node3D
 class_name StageGeometry
 
-# The player pad ends at z=0. The separate note runway starts across an air gap.
-const STAGE_FRONT := -1.1
+# The player pad ends at z=0. The track starts StagePresets.TRACK_NEAR (7.65 m) in front
+# of the player (Constants.PLAYER_Z = 1), across an open gap of 6.65 m.
+const STAGE_FRONT := 1.0 - StagePresets.TRACK_NEAR
 const STAGE_LENGTH := 48.0
 const SCAFFOLD_DEPTH := 1.6
+const PAD_WIDTH := 3.0
 var _geometry := Node3D.new()
 var _stage_collider := BoxShape3D.new()
 var _collision := CollisionShape3D.new()
@@ -81,15 +83,18 @@ func _rebuild() -> void:
 		_geometry.remove_child(child)
 		child.queue_free()
 	visible = not Settings.mixed_reality
-	var width := 4.0 * Settings.LANE_DISTANCE_X
+	var lanes_width := 4.0 * Settings.LANE_DISTANCE_X
+	# The decorative track is wider than the note lanes.
+	var width := maxf(StagePresets.TRACK_HALF_WIDTH * 2.0, lanes_width + 0.3)
 	var half := width * 0.5
-	_stage_collider.size = Vector3(width, 0.14, STAGE_LENGTH)
+	_stage_collider.size = Vector3(lanes_width, 0.14, STAGE_LENGTH)
 	_collision.position = Vector3(0, -0.08, STAGE_FRONT - STAGE_LENGTH * 0.5)
 	var deck := _batch()
 	# A substantial lip makes the runway read as a suspended platform.
 	_box(deck, Vector3(0, -0.085, STAGE_FRONT - 0.08), Vector3(width + 0.14, 0.15, 0.16))
-	# Match the existing two-metre player pad; its collision and burn surface stay intact.
-	_box(deck, Vector3(0, -0.12, 1.0), Vector3(2.08, 0.22, 2.08))
+	# The player platform is 3 m wide and 2 m deep. The 2 m burn surface and its
+	# collision sit in the middle.
+	_box(deck, Vector3(0, -0.12, Constants.PLAYER_Z), Vector3(PAD_WIDTH + 0.08, 0.22, 2.08))
 	_finish(deck, _material(Color("18202e"), 0.72, 0.3, 0.09))
 	var frame := _batch()
 	var front_z := STAGE_FRONT - 0.12
@@ -111,8 +116,39 @@ func _rebuild() -> void:
 	_beam(frame, Vector3(-half, -SCAFFOLD_DEPTH, front_z), Vector3(half, -0.2, front_z), 0.065)
 	_finish(frame, _material(Color("2b3646"), 0.65, 0.4, 0.17))
 	var trim := _batch()
-	_box(trim, Vector3(0, -0.015, -0.016), Vector3(1.96, 0.014, 0.018))
-	_box(trim, Vector3(-1.015, -0.015, 1), Vector3(0.014, 0.014, 1.98))
-	_box(trim, Vector3(1.015, -0.015, 1), Vector3(0.014, 0.014, 1.98))
+	var pad_half := PAD_WIDTH * 0.5 + 0.015
+	_box(trim, Vector3(0, -0.015, Constants.PLAYER_Z - 1.016), Vector3(PAD_WIDTH - 0.04, 0.014, 0.018))
+	_box(trim, Vector3(-pad_half, -0.015, Constants.PLAYER_Z), Vector3(0.014, 0.014, 1.98))
+	_box(trim, Vector3(pad_half, -0.015, Constants.PLAYER_Z), Vector3(0.014, 0.014, 1.98))
 	_box(trim, Vector3(0, -0.015, STAGE_FRONT - 0.008), Vector3(width, 0.014, 0.018))
 	_finish(trim, _material(Color("547aab"), 0.1, 0.4, 1.8))
+	# Dark glass over the track and, for some stages, a large floor. The light shaders
+	# draw reflections underneath (StagePresets mirror areas).
+	var preset := StagePresets.current
+	if preset.get("glass_track", false):
+		var glass := _batch()
+		var length := StagePresets.TRACK_LENGTH
+		_box(glass, Vector3(0, -0.012, STAGE_FRONT - length * 0.5), Vector3(width, 0.02, length))
+		_finish(glass, _glass_material())
+	if preset.has("glass_floor"):
+		var area: Dictionary = preset.glass_floor
+		var floor_glass := _batch()
+		var near := Constants.PLAYER_Z - float(area.near)
+		var far := Constants.PLAYER_Z - float(area.far)
+		_box(floor_glass, Vector3(0, -0.03, (near + far) * 0.5), Vector3(float(area.half_width) * 2.0, 0.02, near - far))
+		_finish(floor_glass, _glass_material())
+
+# Reflections are drawn first (render priority -10) and seen through this.
+func _glass_material() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.02, 0.03, 0.05, 0.35)
+	mat.metallic = 0.9
+	mat.roughness = 0.12
+	mat.cull_mode = BaseMaterial3D.CULL_BACK
+	mat.render_priority = -2
+	return mat
+
+# Called when a map picks its stage preset.
+func rebuild() -> void:
+	_rebuild()

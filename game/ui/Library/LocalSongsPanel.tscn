@@ -86,11 +86,13 @@ unique_name_in_owner = true
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="ResultsList" type="VBoxContainer" parent="VBox/Body/ResultsCard/Results"]
+[node name="ResultsList" type="GridContainer" parent="VBox/Body/ResultsCard/Results"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
 
 [node name="ListMessage" type="Label" parent="VBox/Body/ResultsCard/Results/ResultsList"]
 unique_name_in_owner = true
@@ -106,6 +108,7 @@ autowrap_mode = 3
 
 [node name="Details" parent="VBox/Body" instance=ExtResource("3_details")]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(660, 0)
 layout_mode = 2
 

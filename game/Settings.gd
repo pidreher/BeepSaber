@@ -96,6 +96,10 @@ var glare: bool:
 	set(value):
 		glare = value
 		set_and_emit(&"glare", value)
+var reflections: bool:
+	set(value):
+		reflections = value
+		set_and_emit(&"reflections", value)
 var show_debug_info: bool:
 	set(value):
 		show_debug_info = value
@@ -237,6 +241,7 @@ var default_values = {
 	saber_tail = true,
 	gradual_rotation = 0,
 	glare = true,
+	reflections = true,
 	show_debug_info = false,
 	mixed_reality = false,
 	explain = false,

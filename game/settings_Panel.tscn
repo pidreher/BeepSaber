@@ -134,6 +134,11 @@ layout_mode = 2
 tooltip_text = "Medium Performance impact*"
 text = "*Glow: "
 
+[node name="reflections" type="CheckButton" parent="ScrollContainer/VBox"]
+layout_mode = 2
+tooltip_text = "Low Performance impact*"
+text = "*Floor Reflections: "
+
 [node name="saber_tail" type="CheckButton" parent="ScrollContainer/VBox" unique_id=179132123]
 layout_mode = 2
 tooltip_text = "High Performance impact*"
@@ -433,6 +438,7 @@ scroll_node_path = NodePath("../ScrollContainer")
 [connection signal="button_up" from="ScrollContainer/VBox/recenter" to="." method="_on_recenter_button_up"]
 [connection signal="toggled" from="ScrollContainer/VBox/cut_blocks" to="." method="_on_cut_blocks_toggled"]
 [connection signal="toggled" from="ScrollContainer/VBox/glare" to="." method="_on_glare_toggled"]
+[connection signal="toggled" from="ScrollContainer/VBox/reflections" to="." method="_on_reflections_toggled"]
 [connection signal="toggled" from="ScrollContainer/VBox/saber_tail" to="." method="_on_saber_tail_toggled"]
 [connection signal="toggled" from="ScrollContainer/VBox/mixed_reality" to="." method="_on_mixed_reality_toggled"]
 [connection signal="toggled" from="ScrollContainer/VBox/explain" to="." method="_on_explain_toggled"]

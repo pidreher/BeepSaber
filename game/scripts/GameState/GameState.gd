@@ -1,4 +1,4 @@
-extends Object
+extends RefCounted
 class_name GameState
 
 @warning_ignore("unused_parameter")

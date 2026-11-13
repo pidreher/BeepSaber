@@ -1,8 +1,7 @@
 extends RefCounted
 class_name Map
 
-# this would have basically been impossible to figure out without constantly
-# referencing the beat saber modding group wiki.
+# The community map format documentation:
 # https://bsmg.wiki/mapping/map-format.html
 
 static var current_info: MapInfo
@@ -38,6 +37,52 @@ static var color_right: Color :
 	set(c):
 		_color_right = c
 static var last_beat := 0.
+
+# Note jump state of the loaded difficulty.
+# beat_distance is metres per beat (NJS * seconds per beat at the map's original tempo).
+static var njs := Constants.DEFAULT_NJS
+static var beat_distance := 4.0
+static var half_jump_beats := 4.0
+# Set from the player's height when the view is recentered.
+static var jump_offset_y := 0.0
+
+# Seconds of fly-in left for an object on `beat` (0 once it has reached its jump start).
+static func fly_in_time_left(beat: float, current_beat: float) -> float:
+	var seconds_per_beat := 60.0 / maxf(current_info.beats_per_minute, 1.0)
+	return clampf((beat - current_beat - half_jump_beats) * seconds_per_beat, 0.0, Constants.FLY_IN_TIME)
+
+# How much further away than its steady motion an object is while flying in.
+static func fly_in_extra_distance(time_left: float, speed: float) -> float:
+	return maxf(Constants.FLY_IN_DISTANCE / Constants.FLY_IN_TIME - speed, 0.0) * time_left
+
+# Links each event to the next one of the same type (the stack is in reverse order).
+static func link_events() -> void:
+	var last_by_type := {}
+	for i in range(event_stack.size() - 1, -1, -1):
+		var event := event_stack[i]
+		if event == null: continue
+		event.next_same_type = null
+		if last_by_type.has(event.type):
+			(last_by_type[event.type] as EventInfo).next_same_type = event
+		last_by_type[event.type] = event
+
+static func default_njs(difficulty: DifficultyInfo) -> float:
+	match difficulty.difficulty.to_lower():
+		"expert": return 12.0
+		"expertplus": return 16.0
+	return Constants.DEFAULT_NJS
+
+static func setup_note_jump(difficulty: DifficultyInfo, original_bpm: float) -> void:
+	njs = difficulty.note_jump_movement_speed
+	if njs <= 0.0: njs = default_njs(difficulty)
+	var beat_duration := 60.0 / maxf(original_bpm, 1.0)
+	beat_distance = njs * beat_duration
+	# Start with a 4 beat half jump and halve it until the note appears at most 18 m away.
+	var beats := Constants.START_HALF_JUMP_BEATS
+	while beat_distance * beats > Constants.MAX_HALF_JUMP_DISTANCE - 0.001:
+		beats *= 0.5
+	beats += difficulty.note_jump_start_beat_offset
+	half_jump_beats = maxf(beats, Constants.MIN_HALF_JUMP_BEATS)
 static var one_saber := false
 
 const ROTATIONS_V2 := [ -60., -45., -30., -15., 15., 30., 45., 60. ]
@@ -500,6 +545,10 @@ static func get_rotations_v3(events: Array) -> Array:
 	return r
 
 static func load_beatmap(info: MapInfo, difficulty: DifficultyInfo, map_data: Dictionary) -> bool:
+	# Restarting reuses the same MapInfo, so always scale from the Info.dat tempo.
+	if info.original_bpm < 0.0: info.original_bpm = info.beats_per_minute
+	# Arc curves are built while loading and need the note spacing already.
+	setup_note_jump(difficulty, info.original_bpm)
 	# Ensures the map_data dict has a version (some maps include the version only on info but not in the data)
 	if !map_data.has("_version") and !map_data.has("version"):
 		if info.version.begins_with("2.") or info.version.begins_with("1."):
@@ -515,7 +564,7 @@ static func load_beatmap(info: MapInfo, difficulty: DifficultyInfo, map_data: Di
 		Utils.custom_thread_call(arc_thread_0, load_arc_stack_v2, [Utils.get_array(map_data, "_sliders", []), rotations])
 		chain_stack.clear()
 		current_info = info
-		current_info.beats_per_minute *= Settings.music_speed / 100.
+		current_info.beats_per_minute = info.original_bpm * Settings.music_speed / 100.
 		current_difficulty = difficulty
 		one_saber = difficulty.characteristic == "OneSaber"
 		Map.set_colors_from_custom_data()
@@ -523,6 +572,7 @@ static func load_beatmap(info: MapInfo, difficulty: DifficultyInfo, map_data: Di
 		Utils.custom_thread_wait_to_finish(obstacle_thread_0)
 		Utils.custom_thread_wait_to_finish(event_thread_0)
 		Utils.custom_thread_wait_to_finish(arc_thread_0)
+		link_events()
 		get_last_beat()
 		return true
 	elif map_data.has("version"):
@@ -574,7 +624,7 @@ static func load_beatmap(info: MapInfo, difficulty: DifficultyInfo, map_data: Di
 			else:
 				Utils.custom_thread_call(event_thread_0, load_event_stack_v3, [Utils.get_array(map_data, "basicBeatmapEvents", [])])
 			current_info = info
-			current_info.beats_per_minute *= Settings.music_speed / 100.
+			current_info.beats_per_minute = info.original_bpm * Settings.music_speed / 100.
 			current_difficulty = difficulty
 			one_saber = difficulty.characteristic == "OneSaber"
 			Map.set_colors_from_custom_data()
@@ -584,6 +634,7 @@ static func load_beatmap(info: MapInfo, difficulty: DifficultyInfo, map_data: Di
 			Utils.custom_thread_wait_to_finish(arc_thread_0)
 			Utils.custom_thread_wait_to_finish(chain_thread_0)
 			Utils.custom_thread_wait_to_finish(event_thread_0)
+			link_events()
 			get_last_beat()
 			return true
 	vr.log_warning("selected map is an unsupported version")

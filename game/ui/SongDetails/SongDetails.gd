@@ -72,14 +72,23 @@ func _apply_mode() -> void:
 	var c := compact
 	cover.custom_minimum_size = Vector2(220, 220) if c else Vector2(176, 176)
 	title_label.add_theme_font_size_override("font_size", 36 if c else 32)
-	for n: Control in [stats_grid, diffs_title, diffs_label, description, spacer, download_status, actions]:
+	# compact (the song panel in the menu): stats, preview and delete, but no load
+	# button and no difficulty list (the menu has its own difficulty picker)
+	for n: Control in [diffs_title, diffs_label, description, spacer, download_status]:
 		if c: n.visible = false
-	info_label.visible = c and _has_song
+	if c:
+		stats_grid.visible = _has_song
+		actions.visible = _has_song
+	primary_button.visible = not c
+	info_label.visible = false
 	if not c and _has_song:
 		_set_full_parts_visible(true)
 
 func _set_full_parts_visible(on: bool) -> void:
-	if compact: return
+	if compact:
+		stats_grid.visible = on
+		actions.visible = on
+		return
 	stats_grid.visible = on
 	diffs_title.visible = on
 	diffs_label.visible = on
@@ -117,7 +126,7 @@ func show_local(map: MapInfo, favorite: bool, plays: int, added_unix_time: int =
 
 	var plays_text := "Not played yet" if plays == 0 else ("Played once" if plays == 1 else "Played %d times" % plays)
 	info_label.text = plays_text
-	info_label.visible = compact
+	info_label.visible = false
 
 	_clear(badges)
 	for mod in local_map_mods(map):

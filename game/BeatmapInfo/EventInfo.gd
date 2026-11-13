@@ -28,6 +28,8 @@ var type: int
 var value: int
 var float_value: float
 var custom_color := Utils.NO_COLOR # Chroma, alpha 0 = none
+# The next event of the same type, linked by Map after loading.
+var next_same_type: EventInfo
 
 @warning_ignore("shadowed_variable")
 func _init(beat: float, type: int, value: int, float_value: float) -> void:

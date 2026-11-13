@@ -19,6 +19,8 @@ var effects_audio: SaberEffectsAudio
 var cut_splashes: CubeCutSplash
 
 const COMFORT_EYE_HEIGHT := 1.75
+# Player height is estimated as eye height plus this.
+const PLAYER_HEIGHT_ABOVE_EYES := 0.1
 var _seated_height_lift := 0.0
 var _comfort_rest_heights := {}
 var _first_tracking_height_calibrated := false
@@ -57,8 +59,6 @@ var _first_tracking_height_calibrated := false
 @onready var map_source_dialogs := $MapSourceDialogs as Node3D
 @onready var online_search_keyboard := $Keyboard_online_search as OQ_UI2DKeyboard
 
-@onready var cube_template := preload("res://game/BeepCube/BeepCube.tscn").instantiate() as BeepCube
-
 @onready var track := $Track as Node3D
 @onready var standing_ground := $StandingGround as Floor
 
@@ -83,6 +83,7 @@ var _in_wall := false
 
 #prevents the song for starting from the start when pausing and unpausing
 var pause_position := 0.0
+var _resume_countdown_generation := 0
 
 func start_map(info: MapInfo, map_difficulty: DifficultyInfo) -> void:
 	var map_data := Utils.binary_to_json(Utils.read_binary_file(info.filepath, map_difficulty.beatmap_filename))
@@ -97,6 +98,8 @@ func start_map(info: MapInfo, map_difficulty: DifficultyInfo) -> void:
 	update_left_color(Map.color_left)
 	update_right_color(Map.color_right)
 	event_driver.set_background()
+	event_driver.apply_environment(info.environment_name)
+	standing_ground.update_stage()
 	
 	if Map.event_stack.is_empty():
 		event_driver.set_all_on(Map.color_left, Map.color_right)
@@ -190,6 +193,8 @@ func _reset_fail_effect() -> void:
 # This function will transitioning the game from it's current state into
 # the provided 'next_state'.
 func _transition_game_state(next_state: GameState) -> void:
+	_resume_countdown_generation += 1
+	pause_countdown.hide()
 	effects_audio.stop_all()
 	if next_state != gamestate_playing and next_state != gamestate_paused:
 		cut_splashes.clear()
@@ -226,39 +231,24 @@ func _submit_highscore(player_name: String) -> void:
 
 # Sabers are Area3Ds without a collision layer, so the physics engine never
 # reports them touching each other; check the distance between the blades.
+# Only holding them together counts: a brief touch while swinging gives nothing,
+# a held contact sizzles and buzzes like welding (SaberEffectsAudio.contact_amount).
 const SABER_CLASH_DISTANCE := 0.05
-var _saber_clash_active := false
-var _clash_last_relative := Vector3.ZERO
-var _clash_motion_ready := false
 
 func _update_saber_clash() -> void:
 	var touching := false
 	var point := Vector3.ZERO
-	var impact_strength := 0.4
 	if left_saber.is_extended() and right_saber.is_extended():
 		var l := _saber_blade(left_saber)
 		var r := _saber_blade(right_saber)
 		var closest := Geometry3D.get_closest_points_between_segments(l[0], l[1], r[0], r[1])
 		touching = closest[0].distance_to(closest[1]) < SABER_CLASH_DISTANCE
 		point = (closest[0] + closest[1]) * 0.5
-		var relative := l[1] - r[1]
-		if _clash_motion_ready:
-			var speed := relative.distance_to(_clash_last_relative) / maxf(get_physics_process_delta_time(), 0.001)
-			impact_strength = clampf(speed / 8.0, 0.4, 1.0)
-		_clash_last_relative = relative
-		_clash_motion_ready = true
-	else:
-		_clash_motion_ready = false
-	effects_audio.set_clash(touching and gamestate != gamestate_paused and not _failing, point, impact_strength)
-	if touching:
-		# strong hit when the blades meet, then a lighter buzz while they stay in contact
-		var first_contact := not _saber_clash_active
+	effects_audio.set_clash(touching and gamestate != gamestate_paused and not _failing, point)
+	var amount := effects_audio.contact_amount()
+	if amount > 0.0:
 		for controller: BeepSaberController in [left_controller, right_controller]:
-			if first_contact:
-				controller.simple_rumble(1.0, 0.12)
-			elif not controller.is_simple_rumbling():
-				controller.simple_rumble(0.45, 0.06)
-	_saber_clash_active = touching
+			controller.weld_rumble(amount)
 
 func _saber_blade(saber: LightSaber) -> PackedVector3Array:
 	var base := saber.collision_shape.global_transform * Vector3(0, -saber.collision_cylinder.height * 0.5, 0)
@@ -315,6 +305,9 @@ func _ready() -> void:
 	cut_splashes = CubeCutSplash.new()
 	add_child(cut_splashes)
 	# pre-allocate scenes in our scene pools
+	# On its beat a note is HIT_DISTANCE_FROM_HEAD in front of the head. Track-local z=0 is
+	# where notes are on the beat, so shift the whole track towards the player.
+	track.position.z = Constants.PLAYER_Z - Constants.HIT_DISTANCE_FROM_HEAD
 	GlobalReferences.cube_pool = $BeepCubePool
 	GlobalReferences.link_pool = $ChainLinkPool
 	GlobalReferences.cube_pool.presize(100)
@@ -339,6 +332,11 @@ func _ready() -> void:
 	_cache_comfort_layout()
 	if vr.inVR:
 		vr.xr_interface.session_focussed.connect(_on_first_tracking_focus)
+		vr.xr_interface.session_visible.connect(_on_xr_focus_lost)
+		vr.xr_interface.session_synchronized.connect(_on_xr_focus_lost)
+		vr.xr_interface.session_stopping.connect(_on_xr_focus_lost)
+		vr.xr_interface.session_loss_pending.connect(_on_xr_focus_lost)
+		vr.xr_interface.instance_exiting.connect(get_tree().quit)
 		if vr.xr_interface.get_session_state() == OpenXRInterface.SESSION_STATE_FOCUSED:
 			_on_first_tracking_focus()
 	
@@ -549,16 +547,36 @@ func _main_menu_button() -> void:
 	_clear_track()
 	_transition_game_state(gamestate_mapselection)
 
+func _xr_has_focus() -> bool:
+	return not vr.inVR or vr.xr_interface.get_session_state() == OpenXRInterface.SESSION_STATE_FOCUSED
+
+func _on_xr_focus_lost() -> void:
+	# Opening the SteamVR dashboard or removing the HMD must stop the song.
+	# Stay paused when focus returns so the player can choose when to resume.
+	if gamestate == gamestate_playing:
+		_transition_game_state(gamestate_paused)
+	elif gamestate == gamestate_paused and pause_countdown.visible:
+		_resume_countdown_generation += 1
+		pause_countdown.hide()
+		pause_menu._show()
+		track.hide()
+
 func _unpause_button() -> void:
+	if gamestate != gamestate_paused or pause_countdown.visible or not _xr_has_focus():
+		return
+	_resume_countdown_generation += 1
+	var generation := _resume_countdown_generation
 	pause_menu.visible = false
 	pause_countdown.visible = true
 	track.visible = true
-	pause_countdown.set_label_text("3")
-	await get_tree().create_timer(0.5).timeout
-	pause_countdown.set_label_text("2")
-	await get_tree().create_timer(0.5).timeout
-	pause_countdown.set_label_text("1")
-	await get_tree().create_timer(0.5).timeout
+	for count in [3, 2, 1]:
+		pause_countdown.set_label_text(str(count))
+		await get_tree().create_timer(0.5).timeout
+		if generation != _resume_countdown_generation:
+			return
+		if not _xr_has_focus():
+			_on_xr_focus_lost()
+			return
 	pause_countdown.visible = false
 	
 	# continue game play
@@ -622,7 +640,7 @@ func _on_ScenePool_new_scene_instanced(obj: Node3D, during_presizing: bool) -> v
 func recenter():
 	var xr_camera := $XROrigin3D/XRCamera3D as XRCamera3D
 	xr_origin.rotation.y -= xr_camera.global_rotation.y
-	xr_origin.position -= (xr_camera.global_position * Vector3(1,0,1)) - Vector3(0,0,1)
+	xr_origin.position -= (xr_camera.global_position * Vector3(1,0,1)) - Vector3(0,0,Constants.PLAYER_Z)
 	_apply_player_comfort(true)
 
 func _cache_comfort_layout() -> void:
@@ -641,6 +659,12 @@ func _apply_player_comfort(calibrate_height: bool) -> void:
 	elif calibrate_height and tracked_height > 0.25:
 		_seated_height_lift = clampf(COMFORT_EYE_HEIGHT - tracked_height, -0.6, 1.4)
 	xr_origin.position.y = _seated_height_lift + Settings.player_height_offset
+	if calibrate_height and tracked_height > 0.25:
+		# Automatic player height: player height is eye height + 0.1 m, and notes and walls
+		# move by half the difference to 1.8 m. The manual height adjustment
+		# moves the player instead and keeps its full effect.
+		Map.jump_offset_y = Constants.jump_offset_for_player_height(
+			tracked_height + _seated_height_lift + PLAYER_HEIGHT_ABOVE_EYES)
 	var eye_height := camera.global_position.y
 	if tracked_height <= 0.25: eye_height = COMFORT_EYE_HEIGHT
 	var shift := eye_height - COMFORT_EYE_HEIGHT
@@ -649,8 +673,8 @@ func _apply_player_comfort(calibrate_height: bool) -> void:
 	# The floor-level keyboard shelf is too low when the seated origin is lifted.
 	if Settings.seated_play: online_search_keyboard.position.y += 0.4
 	if calibrate_height:
-		vr.log_info("Height calibrated: seated=%s tracked=%.2fm lift=%.2fm adjustment=%.2fm" % [
-			Settings.seated_play, tracked_height, _seated_height_lift, Settings.player_height_offset])
+		vr.log_info("Height calibrated: seated=%s tracked=%.2fm lift=%.2fm adjustment=%.2fm note offset=%.2fm" % [
+			Settings.seated_play, tracked_height, _seated_height_lift, Settings.player_height_offset, Map.jump_offset_y])
 
 func _on_first_tracking_focus() -> void:
 	if _first_tracking_height_calibrated: return

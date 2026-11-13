@@ -9,10 +9,8 @@ var last_pos2d := Vector2(INF, INF)
 
 
 func ui_raycast_hit_event(pos: Vector3, click: bool, release: bool) -> void:
-	# note: this transform assumes that the unscaled area is [-0.5, -0.5] to [0.5, 0.5] in size
-	var local_position := to_local(pos)
-	var pos2d := Vector2(local_position.x, -local_position.y)
-	pos2d = pos2d + Vector2(0.5, 0.5)
+	# texture coordinates of the hit, on a flat or curved panel
+	var pos2d := parent.local_to_uv(parent.to_local(pos))
 	pos2d.x *= viewport.size.x
 	pos2d.y *= viewport.size.y
 	

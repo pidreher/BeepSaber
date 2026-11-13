@@ -20,6 +20,9 @@ func _ready() -> void:
 
 func set_color(color: Color) -> void:
 	_mat.set_shader_parameter(&"color", color)
+	var glow := light_mesh.get_node_or_null(^"Glow") as MeshInstance3D
+	if glow != null:
+		(glow.material_override as ShaderMaterial).set_shader_parameter(&"color", color)
 	tail.set_color(color)
 	if _hilt != null: _hilt.set_color(color)
 
@@ -58,7 +61,8 @@ func quickhide() -> void:
 func hit(time_offset: float, strength := 1.0) -> void:
 	# a little variation so rapid hits don't sound like a machine gun
 	hitsound.pitch_scale = randf_range(0.93, 1.07)
-	hitsound.volume_db = lerpf(-9.0, 2.0, strength)
+	if strength < 0.02: return
+	hitsound.volume_db = linear_to_db(strength)
 	if time_offset>0.2 or time_offset<-0.05:
 		hitsound.play()
 	else:

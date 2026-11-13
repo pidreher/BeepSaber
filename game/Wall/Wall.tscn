@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://iglrdadxsqw4"]
+[gd_scene load_steps=8 format=3 uid="uid://iglrdadxsqw4"]
 
-[ext_resource type="Material" uid="uid://mu4iyylnwc38" path="res://game/Wall/wall_new2.material" id="1"]
+[ext_resource type="Material" path="res://game/Wall/wall_energy.tres" id="1"]
 [ext_resource type="Script" path="res://game/Wall/Wall.gd" id="2"]
+[ext_resource type="Material" path="res://game/Wall/wall_edges.tres" id="3"]
 
 [sub_resource type="BoxMesh" id="1"]
 resource_local_to_scene = true
@@ -37,6 +38,12 @@ script = ExtResource("2")
 layers = 3
 material_override = ExtResource("1")
 mesh = SubResource("1")
+cast_shadow = 0
+
+[node name="WallEdges" type="MeshInstance3D" parent="WallMeshOrientation"]
+layers = 3
+material_override = ExtResource("3")
+cast_shadow = 0
 
 [node name="WallArea" type="Area3D" parent="WallMeshOrientation" groups=["wall"]]
 collision_mask = 20
