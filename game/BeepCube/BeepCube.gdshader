@@ -22,7 +22,7 @@ uniform float cut_plane_dist = 0;
 // fake environment reflection: the scene has no light sources, so the metal
 // look comes from a procedural "studio" (dark floor, bright horizon strip,
 // soft top light) reflected in the surface
-uniform float shine : hint_range(0.0, 2.0) = 0.9;
+uniform float shine : hint_range(0.0, 2.0) = 1.25;
 
 // The arrow and the dot are drawn as exact shapes (in the 256 px layout of the old
 // emission texture) so their edges stay sharp at any distance.
@@ -91,12 +91,13 @@ void fragment() {
 		float up = r.y;
 		// Broad, soft bands only: a narrow bright strip turns into a thin line
 		// along the tight rounded edges, where the normal sweeps through it.
-		vec3 env = mix(vec3(0.015), vec3(0.18), smoothstep(-0.4, 0.8, up));
+		vec3 env = mix(vec3(0.008), vec3(0.22), smoothstep(-0.4, 0.8, up));
 		float band = (up - 0.3) / 0.38;
-		env += vec3(0.45) * exp(-band * band);
-		env += vec3(0.5) * smoothstep(0.6, 1.0, up);
+		env += vec3(0.7) * exp(-band * band);
+		env += vec3(0.8) * smoothstep(0.6, 1.0, up);
 		float fresnel = pow(1.0 - clamp(dot(n_world, v_world), 0.0, 1.0), 5.0);
-		vec3 f0 = mix(vec3(0.5), color.rgb + vec3(0.25), 0.6);
+		// metal: reflections tinted strongly by the note colour
+		vec3 f0 = mix(vec3(0.35), color.rgb * 1.2 + vec3(0.15), 0.75);
 		EMISSION += env * mix(f0, vec3(1.0), fresnel) * shine;
 
 		if (is_chain_head) {

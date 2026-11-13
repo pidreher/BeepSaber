@@ -76,10 +76,10 @@ var _rumble_intensity := 0.0
 # a deep layer with the original runtime-tuned buzz, rather than sending two
 # pulses that immediately replace each other. A slow envelope gives the deep
 # layer a gentle breathing feel. Both layers follow the arc's distance ramp.
-const ARC_BASS_FREQUENCY := 85.0
+const ARC_BASS_FREQUENCY := 55.0
 const ARC_PULSE_RATE := 2.2
 const ARC_LAYER_PERIOD := 0.08
-const ARC_BASS_SHARE := 0.7
+const ARC_BASS_SHARE := 0.85
 const ARC_PULSE_DURATION := 0.05
 var _arc_strength := 0.0
 var _arc_time := 0.0
@@ -101,7 +101,7 @@ func _update_arc_rumble(delta: float) -> void:
 	# Preserve the existing hit/clash/failure pulses for their full duration.
 	if _is_simple_rumbling: return
 	var bass_layer := fposmod(_arc_time, ARC_LAYER_PERIOD) < ARC_LAYER_PERIOD * ARC_BASS_SHARE
-	var breath := 0.86 + 0.12 * sin(TAU * ARC_PULSE_RATE * _arc_time)
+	var breath := 0.8 + 0.2 * sin(TAU * ARC_PULSE_RATE * _arc_time)
 	_send_rumble(ARC_BASS_FREQUENCY if bass_layer else 0.0,
 		strength * breath if bass_layer else strength, ARC_PULSE_DURATION)
 

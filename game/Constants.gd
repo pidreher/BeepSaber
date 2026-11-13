@@ -68,10 +68,14 @@ const TARGET_PRESWING_ANGLE = 100.
 const TARGET_FOLLOWTHROUGH_ANGLE = 60.
 const SWING_GOOD_SCORE := 95.
 const SWING_CHAIN_LINK_SCORE := 25
+# Health (0-100). A wall empties a full bar in under a second; chain links count little.
 const HEALTH_MISS := -15.
 const HEALTH_BAD_CUT := -10.
 const HEALTH_HIT  := 1.
-const HEALTH_OBSTACLE_PER_SECOND := -13.
+const HEALTH_CHAIN_HIT := 0.2
+const HEALTH_CHAIN_BAD_CUT := -2.5
+const HEALTH_CHAIN_MISS := -3.
+const HEALTH_OBSTACLE_PER_SECOND := -130.
 const HEALTH_BOMB := -15.
 const HEALTH_MAX := 100.
 const HEALTH_START := 50.

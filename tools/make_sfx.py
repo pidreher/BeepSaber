@@ -144,10 +144,12 @@ def periodic_noise(seconds: float, lo: float, hi: float, seed: int) -> np.ndarra
 def arc_loop() -> np.ndarray:
     """Deep electrical flow. The game applies the shared haptic pulse envelope."""
     t = t_axis(1.0)
-    bass = np.sin(2 * np.pi * 85 * t)
-    body = 0.32 * np.sin(2 * np.pi * 170 * t) + 0.15 * np.sin(2 * np.pi * 255 * t)
-    fizz = periodic_noise(1.0, 650, 2400, 9021) * (0.75 + 0.25 * np.sin(2 * np.pi * 5 * t))
-    x = bass + body + 0.24 * fizz
+    # deep: 55 Hz fundamental over a 40 Hz sub, soft overtones, little fizz
+    # (whole-number frequencies keep the 1 s loop seamless)
+    bass = np.sin(2 * np.pi * 55 * t) + 0.6 * np.sin(2 * np.pi * 40 * t)
+    body = 0.28 * np.sin(2 * np.pi * 110 * t) + 0.12 * np.sin(2 * np.pi * 165 * t)
+    fizz = periodic_noise(1.0, 500, 1800, 9021) * (0.75 + 0.25 * np.sin(2 * np.pi * 5 * t))
+    x = np.tanh(1.3 * (bass + body)) + 0.12 * fizz
     return x / np.max(np.abs(x)) * 0.8
 
 

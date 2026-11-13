@@ -57,9 +57,10 @@ func exit_wall() -> void:
 	in_wall = false
 	last_in_wall_time = -1000.
 
-func add_points(position: Vector3, _rotation: float, amount: int, comment: String = "") -> void:
+func add_points(position: Vector3, _rotation: float, amount: int, comment: String = "",
+		health := Constants.HEALTH_HIT) -> void:
 	if amount > 0:
-		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_HIT)
+		GlobalReferences.main_game_scene.update_health(health)
 	
 	if not in_wall:
 		combo += 1
@@ -82,7 +83,8 @@ func add_swing_score(position: Vector3, _rotation: float, accuracy: float, presw
 	add_points(position, _rotation, score, "  (%d %d %d)" % [int(roundf(accuracy)),int(roundf(preswing)),int(roundf(followthrough))])
 
 func chain_link_cut(position: Vector3, _rotation: float) -> void:
-	add_points(position, _rotation, Constants.SWING_CHAIN_LINK_SCORE if Settings.swing_scoring else Constants.OPENSABER_CHAIN_LINK_SCORE)
+	add_points(position, _rotation, Constants.SWING_CHAIN_LINK_SCORE if Settings.swing_scoring else Constants.OPENSABER_CHAIN_LINK_SCORE,
+		"", Constants.HEALTH_CHAIN_HIT)
 
 func note_cut(saber: LightSaber, position: Vector3, _rotation: float, beat_accuracy: float, cut_angle_accuracy: float, cut_distance_accuracy: float, 
 		travel_distance_factor: float, arc_head: bool, arc_tail: bool, chain_head: bool) -> void:
@@ -124,12 +126,20 @@ func bad_cut(position: Vector3, _rotation: float, description: String) -> void:
 	if description == "bomb":
 		reset_combo(false)
 		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_BOMB)
-	elif description == "wrong saber" or description == "miss":
+	elif description == "miss":
 		reset_combo(true)
 		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_MISS)
-		if description == "miss":
-			_play_miss_sound()
-			description = ""
+		_play_miss_sound()
+		description = ""
+	elif description == "chain miss":
+		reset_combo(true)
+		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_CHAIN_MISS)
+		_play_miss_sound()
+		description = ""
+	elif description == "chain wrong saber":
+		reset_combo(true)
+		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_CHAIN_BAD_CUT)
+		description = "wrong saber"
 	else:
 		reset_combo(true)
 		GlobalReferences.main_game_scene.update_health(Constants.HEALTH_BAD_CUT)
