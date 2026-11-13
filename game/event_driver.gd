@@ -43,10 +43,11 @@ var right_color: Color
 # Haze: distance + ground fog whose color follows the current light colors,
 # so flashes bleed into the atmosphere.
 const FOG_BASE_COLOR := Color(0.008, 0.009, 0.022)
-const FOG_LIGHT_INFLUENCE := 0.22
+const FOG_LIGHT_INFLUENCE := 0.09
 var _light_colors: Array[Color] = [Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK]
 var _environment: Environment
 @onready var _atmosphere := preload("res://game/environment/Atmosphere.gd").new()
+@onready var _stage_lightshow := preload("res://game/environment/StageLightshow.gd").new()
 
 # Rings come from the stage preset of the map's environment (StagePresets).
 const RING_COLOR := Color(0.0941176, 0.0941176, 0.0941176)
@@ -86,6 +87,7 @@ func _build_rings() -> void:
 
 func _ready() -> void:
 	add_child(_atmosphere)
+	add_child(_stage_lightshow)
 	_ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_ring_material.albedo_color = RING_COLOR
 	_ring_light_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -200,6 +202,7 @@ func set_background() -> void:
 
 func _process(delta: float) -> void:
 	_atmosphere.set_light_colors(_light_colors)
+	_stage_lightshow.set_light_colors(_light_colors)
 	if _environment:
 		var lights := Color.BLACK
 		for c in _light_colors:

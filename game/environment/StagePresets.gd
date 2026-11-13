@@ -14,13 +14,14 @@ class_name StagePresets
 const ALL_OR_NOTHING := 2
 
 const SMALL_RINGS := {
-	shape = &"square", count = 30, step = 3.5, startup_step = 5.0, rotation_step = 10.0,
-	flexy_speed = 4.0, outer = 5.16, inner = 4.68, depth = 0.6, height = 1.4, distance = 14.0,
+	shape = &"square", count = 24, step = 4.2, startup_step = 5.0, rotation_step = 10.0,
+	flexy_speed = 4.0, outer = 5.16, inner = 4.98, depth = 0.28, height = 1.4, distance = 14.0,
 	zoom = Vector3(1.0, 3.5, 5.0),
+	lights = &"edge_strips", light_length = 3.2, light_thickness = 0.055,
 }
 const BIG_RINGS := {
-	shape = &"square", count = 15, step = 8.0, startup_step = 0.0, rotation_step = 5.0,
-	flexy_speed = 2.0, outer = 24.83, inner = 23.04, depth = 0.8, height = 5.0, distance = 7.0,
+	shape = &"square", count = 12, step = 8.0, startup_step = 0.0, rotation_step = 5.0,
+	flexy_speed = 2.0, outer = 24.83, inner = 24.35, depth = 0.45, height = 5.0, distance = 7.0,
 	zoom = Vector3.ZERO, lights = &"edge_strips", light_length = 6.0, light_thickness = 0.14,
 }
 

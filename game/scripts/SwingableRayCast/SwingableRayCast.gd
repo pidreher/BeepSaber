@@ -20,6 +20,8 @@ const MIN_SWEPT_LENGTH_THRESHOLD := 0.035
 var core_ray_collision_count := 0
 var aux_ray_collision_count := 0
 var adjust_segments := true
+var collision_filter: Callable
+var _has_sweep_history := false
 
 var _prev_ray_positions: Array[Vector3] = []
 var _rays: Array[RayCast3D]
@@ -66,6 +68,7 @@ func reset_counters() -> void:
 
 func set_raycasts_enabled(value: bool) -> void:
 	enabled = value
+	_has_sweep_history = false
 
 func _update_element_positions() -> void:
 	# generate new locations for ray casters
@@ -85,19 +88,37 @@ func _update_element_positions() -> void:
 			
 		next_local_pos += step_dist
 
+# A rejected generous hitbox must not shield the small hitbox or a later note.
+# Exceptions are local to this query, so another saber still sees every collider.
+func _check_ray(ray: RayCast3D) -> bool:
+	var skipped: Array[CollisionObject3D] = []
+	ray.force_raycast_update()
+	var coll := ray.get_collider()
+	var hit := false
+	while coll is Area3D:
+		if not collision_filter.is_valid() or collision_filter.call(coll):
+			area_collided.emit(coll)
+			hit = true
+			break
+		ray.add_exception(coll)
+		skipped.append(coll)
+		ray.force_raycast_update()
+		coll = ray.get_collider()
+	for area in skipped:
+		ray.remove_exception(area)
+	return hit
+
 func _physics_process(_delta: float) -> void:
 	if not enabled: return
 	_sw.start()
 	# see if 'core' ray is colliding with anything
-	var coll := get_collider()
-	if coll is Area3D:
+	if _check_ray(self):
 		core_ray_collision_count += 1
-		area_collided.emit(coll)
 	
 	# ---------------------
 	
 	# update positions of segmented ray casts and check for collisions on them
-	if adjust_segments:
+	if adjust_segments or not _has_sweep_history:
 		_update_element_positions()
 	
 	for i in range(num_collision_raycasts):
@@ -105,14 +126,12 @@ func _physics_process(_delta: float) -> void:
 			
 		# cast a ray to the newest location and check for collisions
 		ray.target_position = ray.to_local(_prev_ray_positions[i])
-		if ray.target_position.length() > MIN_SWEPT_LENGTH_THRESHOLD:
-			ray.force_raycast_update()
-			coll = ray.get_collider()
-			if coll is Area3D:
+		if _has_sweep_history and ray.target_position.length() > MIN_SWEPT_LENGTH_THRESHOLD:
+			if _check_ray(ray):
 				aux_ray_collision_count += 1
-				area_collided.emit(coll)
 		
 		_prev_ray_positions[i] = ray.global_transform.origin
+	_has_sweep_history = true
 		
 	if DEBUG:
 		var old_slice := _debug_raycast_trail.pop_back() as Array[RayCast3D]

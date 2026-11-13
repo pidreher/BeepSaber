@@ -26,6 +26,9 @@ var second_extra_offset_rot := Vector3.ZERO
 var saber_end := Vector3.ZERO
 var saber_end_past := Vector3.ZERO
 var last_dt := 0.0
+var _blade_speed := 0.0
+var _cut_velocity := Vector3.ZERO
+var _has_motion_sample := false
 
 var history := Array()
 const history_size := 300
@@ -129,6 +132,10 @@ func on_settings_changed(key: StringName) -> void:
 			_update_size_and_angle()
 
 func _ready() -> void:
+	# Empty slots make scoring safe even on the first few tracked frames.
+	history.resize(history_size)
+	history.fill([])
+	_swing_cast.collision_filter = _can_cut_area
 	set_saber(Settings.SABER_VISUALS[Settings.saber_visual][1])
 	_anim.play(&"QuickHide")
 	saber_visual.quickhide()
@@ -182,7 +189,7 @@ func get_preswing_angle(time: int, pointing: Vector3) -> float:
 		if dot < smallest_dot_product:
 			smallest_dot_product = dot
 		i = (i - 1 + history_size) % history_size
-	return 180. / PI * acos(smallest_dot_product)
+	return 180. / PI * acos(clampf(smallest_dot_product, -1.0, 1.0))
 	
 func get_followthrough_angle(time: int, pointing: Vector3) -> float:
 	if history[history_tail].size() == 0:
@@ -194,7 +201,7 @@ func get_followthrough_angle(time: int, pointing: Vector3) -> float:
 		if dot < smallest_dot_product:
 			smallest_dot_product = dot
 		i = (i - 1 + history_size) % history_size
-	return 180. / PI * acos(smallest_dot_product)
+	return 180. / PI * acos(clampf(smallest_dot_product, -1.0, 1.0))
 	
 func _update_score(score_entry) -> void:
 	var position := score_entry[1] as Vector3
@@ -217,6 +224,13 @@ func _physics_process(delta: float) -> void:
 	rotation_degrees = offset_rot + extra_offset_rot + second_extra_offset_rot
 	saber_end_past = saber_end
 	saber_end = saber_visual.tip.global_transform.origin
+	_cut_velocity = Vector3.ZERO
+	if _has_motion_sample and is_extended() and delta > 0.0001:
+		_cut_velocity = (saber_end - saber_end_past) / delta
+		_update_blade_speed(_cut_velocity.length(), delta)
+	else:
+		_blade_speed = 0.0
+	_has_motion_sample = is_extended()
 	var time := Time.get_ticks_msec()
 	if Settings.swing_scoring:
 		_update_history(time)
@@ -234,6 +248,7 @@ func _physics_process(delta: float) -> void:
 	RenderingServer.global_shader_parameter_set(&"left_saber" if type == 0 else &"right_saber", saber_end)
 
 func set_saber(saber_path: String) -> void:
+	_reset_cut_motion()
 	var newsaber := (load(saber_path) as PackedScene).instantiate()
 	if newsaber is DefaultSaber:
 		for i in $saber_holder.get_children():
@@ -245,31 +260,47 @@ func set_saber(saber_path: String) -> void:
 		saber_visual.set_trail(Settings.saber_tail)
 
 func set_swingcast_enabled(value: bool) -> void:
+	_reset_cut_motion()
 	_swing_cast.set_raycasts_enabled(value)
 
+func _reset_cut_motion() -> void:
+	_has_motion_sample = false
+	_blade_speed = 0.0
+	_cut_velocity = Vector3.ZERO
+
+# The reference filters speed separately from direction: quick attack, gentle
+# release. Keep raw velocity for arrow direction, slice geometry and particles.
+func _update_blade_speed(speed: float, delta: float) -> void:
+	var target := minf(speed, 100.0)
+	var rate := 24.0 if target >= _blade_speed else 2.0
+	_blade_speed = lerpf(_blade_speed, target, clampf(delta * rate, 0.0, 1.0))
+
+func _can_cut_area(area: Area3D) -> bool:
+	if Scoreboard.paused: return false
+	var note := area.get_parent() as Cuttable
+	return note != null and note.accepts_cut_from(area, type, _cut_velocity, _blade_speed)
+
 func _handle_area_collided(area: Area3D) -> void:
-	if Scoreboard.paused: return
-	var cut_object := area.get_parent()
-	if not cut_object is Cuttable: return
-	var note := cut_object as Cuttable
+	if not _can_cut_area(area): return
+	var note := area.get_parent() as Cuttable
 	
 	var time_offset: float = (
 		(note.beat/Map.current_info.beats_per_minute * 60.0)-
 		song_player_ref.get_playback_position()
 	)
-	var controller_speed: Vector3 = (saber_end - saber_end_past) / last_dt
+	var controller_speed := _cut_velocity
 	# faster swings feel (and sound) stronger: ~1.5 m/s tip speed is a soft tap,
 	# ~9 m/s a full swing
 	# The cut sound is silent below 1.5 m/s tip speed and full from 4 m/s.
-	var hit_strength := smoothstep(1.5, 4.0, controller_speed.length())
+	var hit_strength := smoothstep(1.5, 4.0, _blade_speed)
 	# A bad cut (wrong saber, direction or too slow) gets its own sound.
-	saber_visual.hit(time_offset, hit_strength, note.is_bad_cut(type, controller_speed))
+	saber_visual.hit(time_offset, hit_strength, note.is_bad_cut(type, controller_speed, _blade_speed))
 	# Every cut gets the same full-strength 0.13 s pulse.
 	controller.simple_rumble(1.0, 0.13)
 	
 	var o := controller.global_transform.origin
 	var cutplane := Plane(o, saber_end, saber_end_past + Vector3(0, 0, Map.beat_distance * Map.current_info.beats_per_minute * last_dt / 30)) # Account for relative position to track speed
-	note.cut(self, controller_speed, cutplane, controller)
+	note.cut(self, controller_speed, cutplane, controller, _blade_speed)
 
 func _on_AnimationPlayer_animation_started(_anim_name: StringName) -> void:
 	_swing_cast.adjust_segments = true

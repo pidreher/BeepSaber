@@ -36,13 +36,19 @@ func set_collision_disabled(value: bool) -> void:
 
 # overriden by bombs and cubes
 @warning_ignore("unused_parameter")
-func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController) -> void:
+func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController, blade_speed: float = -1.0) -> void:
 	return
 
 # overridden by cubes and chain links: true if this cut would be a bad cut
 @warning_ignore("unused_parameter")
-func is_bad_cut(saber_type: int, cut_speed: Vector3) -> bool:
+func is_bad_cut(saber_type: int, cut_speed: Vector3, blade_speed: float = -1.0) -> bool:
 	return false
+
+# Called before feedback or cutting. Physics queries can still return a consumed
+# collider in the same tick; skip it and continue the ray to the next candidate.
+@warning_ignore("unused_parameter")
+func accepts_cut_from(area: Area3D, saber_type: int, cut_speed: Vector3, blade_speed: float) -> bool:
+	return not is_queued_for_deletion() and process_mode != Node.PROCESS_MODE_DISABLED and is_visible_in_tree()
 
 # this too
 func on_miss() -> void:

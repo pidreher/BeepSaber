@@ -49,6 +49,25 @@ select this game's seated mode.
 
 The song info panel lists the mods a map requires or suggests and marks unsupported ones.
 
+Arrow cuts accept swings within 60 degrees of the indicated direction. Their angle
+accuracy affects legacy score points without rejecting an otherwise valid cut.
+The enlarged hitbox accepts valid cuts; wrong-direction, wrong-color or slow cuts
+only count against you when they reach the inner hitbox. Blade speed uses a quick
+rise and gentle decay around the existing 2 m/s threshold. Pause/resume resets
+this filter, and swing direction continues to follow actual blade movement.
+Run `--headless --xr-mode off res://tests/cut_validation.tscn` for cut regression
+checks, with `XDG_DATA_HOME` set to a temporary directory to isolate saved data.
+
+The dynamic stage adds sweeping light fans, a segmented light crown and flowing runway
+edges, driven by the map's five lighting groups and custom event colors. Static mode
+freezes the added motion; Simple mode and mixed reality hide these decorations.
+They use batched geometry and soft light shaders that also work with Pico's OpenGL
+renderer. Reflections and glare follow their existing settings.
+
+For a desktop visual review, run Godot with `--xr-mode off --rendering-method
+gl_compatibility res://tests/visual_review.tscn`. It checks stage controls and saves
+screenshots, including notes with glare disabled, under `build/visual-review/`.
+
 # SteamVR (Windows and Linux)
 
 With Godot 4.6.3 and its export templates installed:

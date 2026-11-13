@@ -120,7 +120,7 @@ func hide_cube() -> void:
 	# disable processing on this node and all children to help with performance
 	process_mode = Node.PROCESS_MODE_DISABLED # disable to help with performance
 
-func cut(saber: LightSaber, _cut_speed: Vector3, cut_plane: Plane, _controller: BeepSaberController) -> void:
+func cut(saber: LightSaber, _cut_speed: Vector3, cut_plane: Plane, _controller: BeepSaberController, _blade_speed: float = -1.0) -> void:
 	#_cut_speed = _cut_speed.rotated(Vector3(0,1,0),-rotation.x)
 	if saber.type == which_saber or Map.one_saber or Settings.handedness != 0:
 		Scoreboard.chain_link_cut(transform.origin, lane_rotation)
@@ -135,7 +135,7 @@ func cut(saber: LightSaber, _cut_speed: Vector3, cut_plane: Plane, _controller: 
 		release()# release now instead of waiting for cut pieces to die off
 
 # Chain links only need the right saber (no direction or speed check).
-func is_bad_cut(saber_type: int, _cut_speed: Vector3) -> bool:
+func is_bad_cut(saber_type: int, _cut_speed: Vector3, _blade_speed: float = -1.0) -> bool:
 	return not (saber_type == which_saber or Map.one_saber or Settings.handedness != 0)
 
 func on_miss() -> void:

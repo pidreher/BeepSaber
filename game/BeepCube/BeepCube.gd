@@ -97,19 +97,20 @@ func spawn(note_info: ColorNoteInfo, current_beat: float) -> void:
 	piece_right.set_chain_head(false)
 	chain_head = false
 	
-	# separate cube collision layers to allow a diferent collider on right/wrong cuts.
-	# opposing collision layers (ie. right note & left saber) will be placed on the
-	# smalling collision shape, while similar collision layers (ie right note &
-	# right saber) are placed on the larger collision shape.
+	# Matching sabers get a forgiving outer hitbox for valid cuts. Both sabers
+	# must reach the inner hitbox before an invalid cut can consume the note.
 	var is_left_note := note_info.color == 0
 	var big_coll_area := $BeepCube_Big as Area3D
 	big_coll_area.collision_layer = 0x0
 	big_coll_area.set_collision_layer_value(CollisionLayerConstants.LeftNote_bit, is_left_note)
 	big_coll_area.set_collision_layer_value(CollisionLayerConstants.RightNote_bit, not is_left_note)
+	if Map.one_saber or Settings.handedness != 0:
+		big_coll_area.set_collision_layer_value(CollisionLayerConstants.LeftNote_bit, true)
+		big_coll_area.set_collision_layer_value(CollisionLayerConstants.RightNote_bit, true)
 	var small_coll_area := $BeepCube_Small as Area3D
-	small_coll_area.collision_layer = 0x0
-	small_coll_area.set_collision_layer_value(CollisionLayerConstants.LeftNote_bit, not is_left_note)
-	small_coll_area.set_collision_layer_value(CollisionLayerConstants.RightNote_bit, is_left_note)
+	small_coll_area.collision_layer = 0
+	small_coll_area.set_collision_layer_value(CollisionLayerConstants.LeftNote_bit, true)
+	small_coll_area.set_collision_layer_value(CollisionLayerConstants.RightNote_bit, true)
 	
 	# The root now carries the full jump, so visuals and hitboxes stay aligned.
 	mi.transform = Transform3D.IDENTITY
@@ -175,13 +176,19 @@ const MIN_CUT_DIRECTION_DOT := 0.5 # cos(60 deg)
 func _is_right_saber(saber_type: int) -> bool:
 	return saber_type == which_saber or Map.one_saber or Settings.handedness != 0
 
-func is_bad_cut(saber_type: int, cut_speed: Vector3) -> bool:
-	if not _is_right_saber(saber_type) or cut_speed.length() <= MIN_CUT_SPEED: return true
+func is_bad_cut(saber_type: int, cut_speed: Vector3, blade_speed: float = -1.0) -> bool:
+	var measured_speed := cut_speed.length() if blade_speed < 0.0 else blade_speed
+	if not _is_right_saber(saber_type) or measured_speed <= MIN_CUT_SPEED: return true
 	if is_dot or not Settings.arrows_enabled: return false
 	var cut_direction := -cut_speed.slide(_lane_basis.z).normalized()
-	return global_transform.basis.orthonormalized().y.dot(cut_direction) < MIN_CUT_DIRECTION_DOT
+	# Normalization/rotated lanes can round an exact boundary just below cos(60).
+	return global_transform.basis.orthonormalized().y.dot(cut_direction) < MIN_CUT_DIRECTION_DOT - 0.000001
 
-func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController) -> void:
+func accepts_cut_from(area: Area3D, saber_type: int, cut_speed: Vector3, blade_speed: float) -> bool:
+	if not super.accepts_cut_from(area, saber_type, cut_speed, blade_speed): return false
+	return area != collision_big.get_parent() or not is_bad_cut(saber_type, cut_speed, blade_speed)
+
+func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: BeepSaberController, blade_speed: float = -1.0) -> void:
 	var world_cut_speed := cut_speed
 	# compute the angle between the cube orientation and the cut direction
 	var cut_direction := -cut_speed.slide(_lane_basis.z).normalized()
@@ -192,7 +199,7 @@ func cut(saber: LightSaber, cut_speed: Vector3, cut_plane: Plane, controller: Be
 	if not _is_right_saber(saber.type):
 		Scoreboard.bad_cut(transform.origin, lane_rotation, "wrong saber")
 		cutted.emit(false)
-	elif is_bad_cut(saber.type, cut_speed):
+	elif is_bad_cut(saber.type, cut_speed, blade_speed):
 		Scoreboard.bad_cut(transform.origin, lane_rotation, "bad cut")
 		cutted.emit(false)
 	else:
